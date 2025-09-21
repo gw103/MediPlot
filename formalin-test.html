@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formalin Test Analysis - MediPlot AI</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Language Selector -->
+        <div class="language-selector">
+            <button class="lang-btn active" data-lang="en" onclick="switchLanguage('en')">
+                <i class="fas fa-globe"></i> English
+            </button>
+            <button class="lang-btn" data-lang="zh" onclick="switchLanguage('zh')">
+                <i class="fas fa-globe"></i> 中文
+            </button>
+        </div>
+
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-microscope"></i>
+                <h1 data-translate="app_title">MediPlot AI</h1>
+            </div>
+            <p class="tagline" data-translate="app_tagline">Advanced formalin test analysis for pain behavior research</p>
+            
+            <!-- Navigation Breadcrumb -->
+            <nav class="nav-breadcrumb">
+                <a href="index.html" class="breadcrumb-link">
+                    <i class="fas fa-home"></i>
+                    <span data-translate="nav_home">Home</span>
+                </a>
+                <span class="breadcrumb-separator">•</span>
+                <span class="breadcrumb-current" data-translate="experiment_formalin_title">Formalin Test Analysis</span>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h2 data-translate="experiment_formalin_title">Formalin Test Analysis</h2>
+                <p data-translate="experiment_formalin_desc">Comprehensive analysis of formalin-induced pain behavior in rodents</p>
+            </div>
+
+            <!-- Function Navigation -->
+            <div class="function-nav">
+                <button class="nav-btn active" data-function="description">
+                    <i class="fas fa-info-circle"></i>
+                    <span data-translate="formalin_description">Description</span>
+                </button>
+                <button class="nav-btn" data-function="plots">
+                    <i class="fas fa-chart-bar"></i>
+                    <span data-translate="make_plots">Make Plots</span>
+                </button>
+                <button class="nav-btn" data-function="analysis">
+                    <i class="fas fa-brain"></i>
+                    <span data-translate="ai_analyze">AI Analyze</span>
+                </button>
+                <button class="nav-btn" data-function="ppt">
+                    <i class="fas fa-file-powerpoint"></i>
+                    <span data-translate="make_ppt">Make PPT</span>
+                </button>
+            </div>
+
+            <!-- Function Content -->
+            <div class="function-content">
+                <!-- Description Panel -->
+                <div class="function-panel active" id="description-panel">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-info-circle"></i> <span data-translate="formalin_description">Formalin Test Description</span></h3>
+                    </div>
+                    <div class="panel-content">
+                        <div class="description-content">
+                            <h4 data-translate="overview_title">Overview</h4>
+                            <p data-translate="formalin_description_content">The formalin test is a widely used animal model for studying acute and chronic pain. It involves injecting a small amount of diluted formalin (formaldehyde) into the hind paw of a rodent, which produces a characteristic biphasic pain response.</p>
+
+                            <h4 data-translate="test_phases_title">Test Phases</h4>
+                            <div class="phases-grid">
+                                <div class="phase-card">
+                                    <h5 data-translate="phase_i_title">Phase I (0-10 minutes)</h5>
+                                    <p data-translate="phase_i_desc">Acute pain response caused by direct stimulation of nociceptors.</p>
+                                    <span class="phase-duration">0-10 min</span>
+                                </div>
+                                <div class="phase-card">
+                                    <h5 data-translate="phase_ii_title">Phase II (11-60 minutes)</h5>
+                                    <p data-translate="phase_ii_desc">Chronic pain response involving inflammatory processes and central sensitization.</p>
+                                    <span class="phase-duration">11-60 min</span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plots Panel -->
+                <div class="function-panel" id="plots-panel">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-chart-bar"></i> Generate Plots</h3>
+                    </div>
+                    <div class="panel-content">
+                        <!-- Upload Section -->
+                        <div class="upload-section">
+                            <div class="upload-area" id="upload-area">
+                                <div class="upload-content">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <h4>Upload Your Data File</h4>
+                                    <p>Drag and drop your CSV or Excel file here, or click to browse</p>
+                                    <button class="browse-btn">Browse Files</button>
+                                    <input type="file" id="file-input" accept=".csv,.xlsx,.xls" style="display: none;">
+                                </div>
+                            </div>
+                            
+                            <div class="file-info" id="file-info" style="display: none;">
+                                <div class="file-details">
+                                    <i class="fas fa-file-excel"></i>
+                                    <div>
+                                        <div class="file-name"></div>
+                                        <div class="file-size"></div>
+                                    </div>
+                                </div>
+                                <button class="remove-file" onclick="removeFile()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="group-names-section" style="display: none;">
+                            <h4>Group Names (Optional)</h4>
+                            <p class="section-description">Enter custom names for your experimental groups. Leave blank to use default names.</p>
+                            <div class="group-names-grid" id="group-names-grid">
+                                <!-- Group name inputs will be populated by JavaScript after file processing -->
+                            </div>
+                        </div>
+
+
+                        <div class="plot-modes">
+                            <h4>Select Analysis Mode</h4>
+                            <div class="mode-selection">
+                                <button class="mode-btn active" data-mode="mpe" onclick="selectMode('mpe')">
+                                    <i class="fas fa-chart-bar"></i>
+                                    MPE Analysis
+                                </button>
+                                <button class="mode-btn" data-mode="phase-comparison" onclick="selectMode('phase-comparison')">
+                                    <i class="fas fa-balance-scale"></i>
+                                    Phase Comparison
+                                </button>
+                                <button class="mode-btn" data-mode="time-series" onclick="selectMode('time-series')">
+                                    <i class="fas fa-chart-line"></i>
+                                    Time Series Plot
+                                </button>
+                                <button class="mode-btn" data-mode="distribution" onclick="selectMode('distribution')">
+                                    <i class="fas fa-circle"></i>
+                                    Distribution of Samples
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Group Selection for Time Series and Distribution Plots -->
+                        <div class="group-selection-section" id="group-selection-section" style="display: none;">
+                            <h4><i class="fas fa-eye"></i> Select Groups to Display</h4>
+                            <p class="section-description">Choose which groups to show in the plot. Uncheck groups to hide their data.</p>
+                            <div class="group-selection-grid" id="group-selection-grid">
+                                <!-- Group selection checkboxes will be populated by JavaScript -->
+                            </div>
+                            <div class="group-selection-actions">
+                                <button class="selection-btn" onclick="selectAllGroups()">
+                                    <i class="fas fa-check-square"></i> Select All
+                                </button>
+                                <button class="selection-btn" onclick="deselectAllGroups()">
+                                    <i class="fas fa-square"></i> Deselect All
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="generate-section">
+                            <button class="generate-btn" id="generate-plots" onclick="generatePlots()">
+                                <i class="fas fa-chart-bar"></i>
+                                Generate Plots
+                            </button>
+                        </div>
+
+                        <div class="plots-container" id="plots-container" style="display: none;">
+                            <h4>Generated Plots</h4>
+                            <div class="plot-gallery">
+                                <div class="plot-placeholder">
+                                    <i class="fas fa-chart-line"></i>
+                                    <p>Time Series Plot</p>
+                                </div>
+                                <div class="plot-placeholder">
+                                    <i class="fas fa-chart-bar"></i>
+                                    <p>Phase Comparison</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Analysis Panel -->
+                <div class="function-panel" id="analysis-panel">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-brain"></i> AI Analysis</h3>
+                    </div>
+                    <div class="panel-content">
+                        <div class="ai-analysis-intro">
+                            <p><i class="fas fa-info-circle"></i> Use Gemini AI to analyze your data and generate comprehensive insights</p>
+                        </div>
+
+                        <div class="analysis-sections">
+                            <div class="analysis-section">
+                                <h4>Data Quality Assessment</h4>
+                                <div class="placeholder-content">
+                                    <i class="fas fa-check-circle"></i>
+                                    <p>Automated data validation and quality checks</p>
+                                </div>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>Statistical Analysis</h4>
+                                <div class="placeholder-content">
+                                    <i class="fas fa-chart-line"></i>
+                                    <p>Advanced statistical analysis and significance testing</p>
+                                </div>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>Biological Interpretation</h4>
+                                <div class="placeholder-content">
+                                    <i class="fas fa-dna"></i>
+                                    <p>Biological significance and mechanistic insights</p>
+                                </div>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>Summary Report</h4>
+                                <div class="placeholder-content">
+                                    <i class="fas fa-file-alt"></i>
+                                    <p>Comprehensive analysis report with recommendations</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ai-controls">
+                            <div class="api-info">
+                                <p><i class="fas fa-info-circle"></i> AI Analysis powered by Google Gemini</p>
+                                <small>Advanced biomedical analysis of your formalin test data</small>
+                            </div>
+                            
+                            <div class="ai-options">
+                                <div class="ai-option-card">
+                                    <div class="ai-option-icon">
+                                        <i class="fas fa-comments"></i>
+                                    </div>
+                                    <h4>AI Chatbot</h4>
+                                    <p>Interactive conversation about your data</p>
+                                    <button class="ai-btn chatbot-btn" onclick="openChatbot()">
+                                        <i class="fas fa-comments"></i>
+                                        Start Chat
+                                    </button>
+                                </div>
+                                
+                                <div class="ai-option-card">
+                                    <div class="ai-option-icon">
+                                        <i class="fas fa-file-download"></i>
+                                    </div>
+                                    <h4>AI Report</h4>
+                                    <p>Download comprehensive analysis report</p>
+                                    <button class="ai-btn report-btn" onclick="generateAIReport()">
+                                        <i class="fas fa-file-download"></i>
+                                        Generate Report
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="analysis-results" id="analysis-results" style="display: none;">
+                            <h4>Analysis Results</h4>
+                            <div class="results-content">
+                                <div class="loading-spinner">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <p>Analyzing your data...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PPT Panel -->
+                <div class="function-panel" id="ppt-panel">
+                    <div class="panel-header">
+                        <h3><i class="fas fa-file-powerpoint"></i> Generate PowerPoint</h3>
+                    </div>
+                    <div class="panel-content">
+                        <div class="ppt-intro">
+                            <p><i class="fas fa-info-circle"></i> Create professional PowerPoint presentations for your research findings</p>
+                        </div>
+
+                        <div class="ppt-sections">
+                            <div class="ppt-section">
+                                <h4>Choose Template</h4>
+                                <div class="template-grid">
+                                    <div class="template-card">
+                                        <i class="fas fa-graduation-cap"></i>
+                                        <h5>Academic</h5>
+                                        <p>Professional academic presentation</p>
+                                    </div>
+                                    <div class="template-card">
+                                        <i class="fas fa-briefcase"></i>
+                                        <h5>Corporate</h5>
+                                        <p>Business-focused presentation</p>
+                                    </div>
+                                    <div class="template-card">
+                                        <i class="fas fa-chart-line"></i>
+                                        <h5>Data-Driven</h5>
+                                        <p>Statistics and charts focused</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="ppt-section">
+                                <h4>Content Options</h4>
+                                <div class="content-options">
+                                    <label class="option-item">
+                                        <input type="checkbox" checked>
+                                        <span class="checkmark"></span>
+                                        Include Plots
+                                    </label>
+                                    <label class="option-item">
+                                        <input type="checkbox" checked>
+                                        <span class="checkmark"></span>
+                                        Statistical Analysis
+                                    </label>
+                                    <label class="option-item">
+                                        <input type="checkbox" checked>
+                                        <span class="checkmark"></span>
+                                        AI Insights
+                                    </label>
+                                    <label class="option-item">
+                                        <input type="checkbox" checked>
+                                        <span class="checkmark"></span>
+                                        Methodology
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="ppt-section">
+                                <h4>Customization</h4>
+                                <div class="customization-options">
+                                    <div class="custom-field">
+                                        <label for="lab-name">Lab Name</label>
+                                        <input type="text" id="lab-name" placeholder="Enter lab name">
+                                    </div>
+                                    <div class="custom-field">
+                                        <label for="researcher-name">Researcher Name</label>
+                                        <input type="text" id="researcher-name" placeholder="Enter researcher name">
+                                    </div>
+                                    <div class="custom-field">
+                                        <label for="experiment-date">Experiment Date</label>
+                                        <input type="date" id="experiment-date">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="generate-ppt">
+                            <button class="generate-ppt-btn" onclick="generatePPT()">
+                                <i class="fas fa-file-powerpoint"></i>
+                                Generate PowerPoint
+                            </button>
+                        </div>
+
+                        <div class="ppt-status" id="ppt-status" style="display: none;">
+                            <div class="status-content">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <h4>Generating Presentation</h4>
+                                <p>Please wait while we create your PowerPoint presentation...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 MediPlot AI. Advanced medical research tools.</p>
+        </footer>
+    </div>
+
+
+    <!-- AI Chatbot Modal -->
+    <div class="chatbot-modal" id="chatbot-modal">
+        <div class="chatbot-content" id="chatbot-content">
+            <div class="chatbot-header" id="chatbot-header">
+                <h3><i class="fas fa-robot"></i> AI Research Assistant</h3>
+                <div class="chatbot-controls">
+                    <button class="chatbot-zoom-btn" onclick="zoomChatbot('out')" title="Zoom Out">
+                        <i class="fas fa-search-minus"></i>
+                    </button>
+                    <button class="chatbot-zoom-btn" onclick="zoomChatbot('in')" title="Zoom In">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                    <button class="chatbot-zoom-btn" onclick="resetChatbotSize()" title="Reset Size">
+                        <i class="fas fa-expand-arrows-alt"></i>
+                    </button>
+                    <button class="chatbot-close" onclick="closeChatbot()">&times;</button>
+                </div>
+            </div>
+            <div class="chatbot-body">
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message ai-message">
+                        <div class="message-content">
+                            <i class="fas fa-robot"></i>
+                            <p>Hello! I'm your AI research assistant. I can help you analyze your formalin test data, explain statistical concepts, interpret results, and answer questions about pain behavior research. What would you like to know?</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <div class="chat-input-container">
+                        <input type="text" id="chat-input" placeholder="Ask me about your data, statistics, or research methodology..." onkeypress="handleChatKeyPress(event)">
+                        <button class="chat-send-btn" onclick="sendChatMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div class="chat-actions">
+                        <button class="chat-action-btn" onclick="askAboutData()">
+                            <i class="fas fa-database"></i> Ask about my data
+                        </button>
+                        <button class="chat-action-btn" onclick="askAboutStatistics()">
+                            <i class="fas fa-chart-line"></i> Statistical help
+                        </button>
+                        <button class="chat-action-btn" onclick="askAboutMethodology()">
+                            <i class="fas fa-microscope"></i> Methodology
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

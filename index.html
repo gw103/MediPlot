@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediPlot AI - Advanced Medical Research Tools</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Language Selector -->
+        <div class="language-selector">
+            <button class="lang-btn active" data-lang="en" onclick="switchLanguage('en')">
+                <i class="fas fa-globe"></i> English
+            </button>
+            <button class="lang-btn" data-lang="zh" onclick="switchLanguage('zh')">
+                <i class="fas fa-globe"></i> 中文
+            </button>
+        </div>
+
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-microscope"></i>
+                <h1 data-translate="app_title">MediPlot AI</h1>
+            </div>
+            <p class="tagline" data-translate="app_tagline">Advanced formalin test analysis for pain behavior research</p>
+            
+            <!-- Navigation Breadcrumb -->
+            <nav class="nav-breadcrumb">
+                <a href="#" class="breadcrumb-link">
+                    <i class="fas fa-home"></i>
+                    <span data-translate="nav_home">Home</span>
+                </a>
+                <span class="breadcrumb-separator">•</span>
+                <span class="breadcrumb-current" data-translate="nav_select_experiment">Select Experiment</span>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="welcome-section">
+                <h2 data-translate="welcome_title">Welcome to MediPlot AI</h2>
+                <p data-translate="welcome_subtitle">Select an experiment type to begin your analysis</p>
+            </div>
+
+            <!-- Experiment Grid -->
+            <div class="experiment-grid">
+                <div class="experiment-card active" data-experiment="formalin">
+                    <div class="experiment-icon">
+                        <i class="fas fa-flask"></i>
+                    </div>
+                    <h3 data-translate="experiment_formalin_title">Formalin Test</h3>
+                    <p data-translate="experiment_formalin_desc">Comprehensive analysis of formalin-induced pain behavior in rodents</p>
+                    <span class="default-badge" data-translate="experiment_default">Default</span>
+                </div>
+            </div>
+
+            <!-- Action Section -->
+            <div class="action-section">
+                <button class="start-btn" onclick="startExperiment()">
+                    <i class="fas fa-play"></i>
+                    <span data-translate="btn_start_analysis">Start Formalin Test Analysis</span>
+                </button>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 MediPlot AI. <span data-translate="footer_tagline">Advanced medical research tools.</span></p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
