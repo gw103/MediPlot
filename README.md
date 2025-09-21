@@ -41,12 +41,12 @@ A comprehensive web application for analyzing formalin test data in rodents, fea
 ## 🚀 Quick Start
 
 ### **Live Demo**
-Visit the live application: [MediPlot AI Demo](https://your-username.github.io/MediPlot)
+Visit the live application: [MediPlot AI Demo](https://gw103.github.io/MediPlot)
 
 ### **Local Installation**
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-username/MediPlot.git
+   git clone https://github.com/gw103/MediPlot.git
    cd MediPlot
    ```
 
@@ -192,7 +192,7 @@ We welcome contributions! Please feel free to:
 
 ### **Development Setup**
 ```bash
-git clone https://github.com/your-username/MediPlot.git
+git clone https://github.com/gw103/MediPlot.git
 cd MediPlot
 # Start local server and begin development
 ```
@@ -210,9 +210,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Issues**: Report bugs and request features on [GitHub Issues](https://github.com/your-username/MediPlot/issues)
-- **Discussions**: Join community discussions on [GitHub Discussions](https://github.com/your-username/MediPlot/discussions)
-- **Documentation**: Check the [Wiki](https://github.com/your-username/MediPlot/wiki) for detailed guides
+- **Issues**: Report bugs and request features on [GitHub Issues](https://github.com/gw103/MediPlot/issues)
+- **Discussions**: Join community discussions on [GitHub Discussions](https://github.com/gw103/MediPlot/discussions)
+- **Documentation**: Check the [Wiki](https://github.com/gw103/MediPlot/wiki) for detailed guides
 
 ## 🔮 Roadmap
 
