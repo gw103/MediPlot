@@ -80,16 +80,97 @@
                             <p data-translate="formalin_description_content">The formalin test is a widely used animal model for studying acute and chronic pain. It involves injecting a small amount of diluted formalin (formaldehyde) into the hind paw of a rodent, which produces a characteristic biphasic pain response.</p>
 
                             <h4 data-translate="test_phases_title">Test Phases</h4>
-                            <div class="phases-grid">
+                            
+                            <!-- Phase Configuration -->
+                            <div class="phase-config-section">
+                                <h5 data-translate="phase_config_title">Phase Configuration</h5>
+                                
+                                <!-- Mode Selection -->
+                                <div class="phase-mode-selection">
+                                    <label>
+                                        <input type="radio" name="phase-mode" value="standard" checked onchange="switchPhaseMode('standard')">
+                                        <span data-translate="standard_mode">Standard Mode (3 Phases)</span>
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="phase-mode" value="custom" onchange="switchPhaseMode('custom')">
+                                        <span data-translate="custom_mode">Custom Mode</span>
+                                    </label>
+                                </div>
+                                
+                                <!-- Standard Mode (3 Phases) -->
+                                <div id="standard-phase-config">
+                                    <p data-translate="phase_config_desc">Customize the time ranges for each phase of the formalin test.</p>
+                                    
+                                    <div class="phase-config-grid">
+                                        <div class="phase-config-item">
+                                            <label data-translate="phase_1_label">Phase 1 Start:</label>
+                                            <input type="number" id="phase1-start" value="0" min="0" max="60" class="phase-input" onchange="syncPhaseBoundaries()">
+                                            <span data-translate="minutes">minutes</span>
+                                        </div>
+                                        <div class="phase-config-item">
+                                            <label data-translate="phase_1_end_label">Phase 1 End / Phase 2a Start:</label>
+                                            <input type="number" id="phase1-end" value="10" min="0" max="60" class="phase-input" onchange="syncPhaseBoundaries()">
+                                            <span data-translate="minutes">minutes</span>
+                                        </div>
+                                        <div class="phase-config-item">
+                                            <label data-translate="phase_2a_end_label">Phase 2a End / Phase 2b Start:</label>
+                                            <input type="number" id="phase2a-end" value="40" min="0" max="60" class="phase-input" onchange="syncPhaseBoundaries()">
+                                            <span data-translate="minutes">minutes</span>
+                                        </div>
+                                        <div class="phase-config-item">
+                                            <label data-translate="phase_2b_end_label">Phase 2b End:</label>
+                                            <input type="number" id="phase2b-end" value="60" min="0" max="60" class="phase-input" onchange="syncPhaseBoundaries()">
+                                            <span data-translate="minutes">minutes</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Custom Mode -->
+                                <div id="custom-phase-config" style="display: none;">
+                                    <!-- Step 1: Select Number of Phases -->
+                                    <div id="custom-phase-step1">
+                                        <p data-translate="custom_phase_desc">Define your own phases with custom boundaries.</p>
+                                        
+                                        <div class="phase-config-item" style="margin-bottom: 20px;">
+                                            <label data-translate="num_phases_label">Number of Phases:</label>
+                                            <input type="number" id="num-phases" value="3" min="2" max="10" class="phase-input">
+                                        </div>
+                                        
+                                        <button class="btn-secondary" onclick="proceedToCustomPhaseStep2()" data-translate="continue_btn">Continue</button>
+                                    </div>
+                                    
+                                    <!-- Step 2: Define Phase Boundaries -->
+                                    <div id="custom-phase-step2" style="display: none;">
+                                        <p data-translate="define_boundaries_desc">Define the boundary for each consecutive phase.</p>
+                                        
+                                        <div id="custom-phase-boundaries"></div>
+                                        
+                                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                                            <button class="btn-secondary" onclick="backToCustomPhaseStep1()" data-translate="back_btn">Back</button>
+                                            <button class="btn-secondary" onclick="applyCustomPhaseConfig()" data-translate="apply_config">Apply Configuration</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <button class="btn-secondary" onclick="applyPhaseConfig()" data-translate="apply_config">Apply Configuration</button>
+                            </div>
+                            
+                            <!-- Phase Display -->
+                            <div class="phases-grid" id="phases-display">
                                 <div class="phase-card">
-                                    <h5 data-translate="phase_i_title">Phase I (0-10 minutes)</h5>
+                                    <h5 id="phase1-title">Phase 1 (0-10 minutes)</h5>
                                     <p data-translate="phase_i_desc">Acute pain response caused by direct stimulation of nociceptors.</p>
-                                    <span class="phase-duration">0-10 min</span>
+                                    <span class="phase-duration" id="phase1-duration">0-10 min</span>
                                 </div>
                                 <div class="phase-card">
-                                    <h5 data-translate="phase_ii_title">Phase II (11-60 minutes)</h5>
-                                    <p data-translate="phase_ii_desc">Chronic pain response involving inflammatory processes and central sensitization.</p>
-                                    <span class="phase-duration">11-60 min</span>
+                                    <h5 id="phase2a-title">Phase 2a (11-40 minutes)</h5>
+                                    <p data-translate="phase_2a_desc">Early chronic pain response with inflammatory processes.</p>
+                                    <span class="phase-duration" id="phase2a-duration">11-40 min</span>
+                                </div>
+                                <div class="phase-card">
+                                    <h5 id="phase2b-title">Phase 2b (41-60 minutes)</h5>
+                                    <p data-translate="phase_2b_desc">Late chronic pain response with central sensitization.</p>
+                                    <span class="phase-duration" id="phase2b-duration">41-60 min</span>
                                 </div>
                             </div>
 

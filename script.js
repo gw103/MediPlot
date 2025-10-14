@@ -37,7 +37,99 @@ const translations = {
         ai_analyze: "AI Analyze",
         make_ppt: "Make PPT",
         overview_title: "Overview",
-        test_phases_title: "Test Phases"
+        test_phases_title: "Test Phases",
+        // Plots panel
+        upload_your_data_file: "Upload Your Data File",
+        drag_drop_description: "Drag and drop your CSV or Excel file here, or click to browse",
+        browse_files: "Browse Files",
+        group_names_optional: "Group Names (Optional)",
+        group_names_description: "Enter custom names for your experimental groups. Leave blank to use default names.",
+        select_analysis_mode: "Select Analysis Mode",
+        mpe_analysis: "MPE Analysis",
+        phase_comparison: "Phase Comparison",
+        time_series_plot: "Time Series Plot",
+        distribution_samples: "Distribution of Samples",
+        generate_plots: "Generate Plots",
+        help_button: "Help",
+        // AI Analysis panel
+        ai_analysis_powered: "AI Analysis powered by Google Gemini",
+        advanced_biomedical: "Advanced biomedical analysis of your formalin test data",
+        ai_chatbot_title: "AI Chatbot",
+        interactive_conversation: "Interactive conversation about your data",
+        start_chat: "Start Chat",
+        ai_report_title: "AI Report",
+        download_comprehensive: "Download comprehensive analysis report",
+        generate_report: "Generate Report",
+        // PPT panel
+        ppt_intro: "Create professional PowerPoint presentations for your research findings",
+        choose_template: "Choose Template",
+        academic: "Academic",
+        professional_academic: "Professional academic presentation",
+        corporate: "Corporate",
+        business_focused: "Business-focused presentation",
+        data_driven: "Data-Driven",
+        statistics_charts: "Statistics and charts focused",
+        content_options: "Content Options",
+        include_plots: "Include Plots",
+        statistical_analysis: "Statistical Analysis",
+        ai_insights: "AI Insights",
+        methodology: "Methodology",
+        customization: "Customization",
+        lab_name: "Lab Name",
+        enter_lab_name: "Enter lab name",
+        researcher_name: "Researcher Name",
+        enter_researcher_name: "Enter researcher name",
+        experiment_date: "Experiment Date",
+        // Group selection
+        select_groups_to_display: "Select Groups to Display",
+        choose_groups_description: "Choose which groups to show in the plot. Uncheck groups to hide their data.",
+        vehicle: "Vehicle",
+        sham: "Sham",
+        select_all: "Select All",
+        deselect_all: "Deselect All",
+        // Dynamic button texts
+        generate_mpe_analysis: "Generate MPE Analysis",
+        generate_phase_comparison: "Generate Phase Comparison",
+        generate_time_series_plot: "Generate Time Series Plot",
+        generate_distribution_plot: "Generate Distribution Plot",
+        // AI Analysis sections
+        data_quality_assessment: "Data Quality Assessment",
+        automated_data_validation: "Automated data validation and quality checks",
+        statistical_analysis_title: "Statistical Analysis",
+        advanced_statistical_analysis: "Advanced statistical analysis and significance testing",
+        biological_interpretation: "Biological Interpretation",
+        biological_significance: "Biological significance and mechanistic insights",
+        summary_report: "Summary Report",
+        comprehensive_analysis_report: "Comprehensive analysis report with recommendations",
+        // Chatbot
+        ai_research_assistant: "AI Research Assistant",
+        chatbot_welcome: "Hello! I'm your AI research assistant. I can help you analyze your formalin test data, explain statistical concepts, interpret results, and answer questions about pain behavior research. What would you like to know?",
+        chat_placeholder: "Ask me about your data, statistics, or research methodology...",
+        ask_about_data: "Ask about my data",
+        statistical_help: "Statistical help",
+        methodology_help: "Methodology",
+        generating_presentation: "Generating Presentation",
+        please_wait_presentation: "Please wait while we create your PowerPoint presentation...",
+        // Phase Configuration
+        phase_config_title: "Phase Configuration",
+        phase_config_desc: "Customize the time ranges for each phase of the formalin test.",
+        phase_1_label: "Phase 1 Start:",
+        phase_1_end_label: "Phase 1 End / Phase 2a Start:",
+        phase_2a_end_label: "Phase 2a End / Phase 2b Start:",
+        phase_2b_end_label: "Phase 2b End:",
+        minutes: "minutes",
+        apply_config: "Apply Configuration",
+        phase_i_desc: "Acute pain response caused by direct stimulation of nociceptors.",
+        phase_2a_desc: "Early chronic pain response with inflammatory processes.",
+        phase_2b_desc: "Late chronic pain response with central sensitization.",
+        // Custom Phase Mode
+        standard_mode: "Standard Mode (3 Phases)",
+        custom_mode: "Custom Mode",
+        custom_phase_desc: "Define your own phases with custom boundaries.",
+        num_phases_label: "Number of Phases:",
+        continue_btn: "Continue",
+        back_btn: "Back",
+        define_boundaries_desc: "Define the boundary for each consecutive phase."
     },
     zh: {
         app_title: "MediPlot AI",
@@ -63,9 +155,312 @@ const translations = {
         ai_analyze: "AI分析",
         make_ppt: "制作PPT",
         overview_title: "概述",
-        test_phases_title: "测试阶段"
+        test_phases_title: "测试阶段",
+        // Plots panel
+        upload_your_data_file: "上传数据文件",
+        drag_drop_description: "将CSV或Excel文件拖放到此处，或点击浏览",
+        browse_files: "浏览文件",
+        group_names_optional: "组名（可选）",
+        group_names_description: "为您的实验组输入自定义名称。留空则使用默认名称。",
+        select_analysis_mode: "选择分析模式",
+        mpe_analysis: "MPE分析",
+        phase_comparison: "阶段对比",
+        time_series_plot: "时间序列图",
+        distribution_samples: "样本分布",
+        generate_plots: "生成图表",
+        help_button: "帮助",
+        // AI Analysis panel
+        ai_analysis_powered: "AI分析由Google Gemini提供支持",
+        advanced_biomedical: "先进的福尔马林测试数据生物医学分析",
+        ai_chatbot_title: "AI聊天机器人",
+        interactive_conversation: "关于您数据的互动对话",
+        start_chat: "开始聊天",
+        ai_report_title: "AI报告",
+        download_comprehensive: "下载综合分析报告",
+        generate_report: "生成报告",
+        // PPT panel
+        ppt_intro: "为您的研究发现创建专业的PowerPoint演示文稿",
+        choose_template: "选择模板",
+        academic: "学术",
+        professional_academic: "专业学术演示",
+        corporate: "企业",
+        business_focused: "商务导向演示",
+        data_driven: "数据驱动",
+        statistics_charts: "统计和图表导向",
+        content_options: "内容选项",
+        include_plots: "包含图表",
+        statistical_analysis: "统计分析",
+        ai_insights: "AI洞察",
+        methodology: "方法论",
+        customization: "自定义",
+        lab_name: "实验室名称",
+        enter_lab_name: "输入实验室名称",
+        researcher_name: "研究人员姓名",
+        enter_researcher_name: "输入研究人员姓名",
+        experiment_date: "实验日期",
+        // Group selection
+        select_groups_to_display: "选择要显示的组",
+        choose_groups_description: "选择要在图表中显示的组。取消选中组以隐藏其数据。",
+        vehicle: "载体",
+        sham: "假手术",
+        select_all: "全选",
+        deselect_all: "取消全选",
+        // Dynamic button texts
+        generate_mpe_analysis: "生成MPE分析",
+        generate_phase_comparison: "生成阶段对比",
+        generate_time_series_plot: "生成时间序列图",
+        generate_distribution_plot: "生成分布图",
+        // AI Analysis sections
+        data_quality_assessment: "数据质量评估",
+        automated_data_validation: "自动化数据验证和质量检查",
+        statistical_analysis_title: "统计分析",
+        advanced_statistical_analysis: "高级统计分析和显著性检验",
+        biological_interpretation: "生物学解释",
+        biological_significance: "生物学意义和机制洞察",
+        summary_report: "总结报告",
+        comprehensive_analysis_report: "包含建议的综合分析报告",
+        // Chatbot
+        ai_research_assistant: "AI研究助手",
+        chatbot_welcome: "您好！我是您的AI研究助手。我可以帮助您分析福尔马林测试数据、解释统计概念、解释结果，并回答关于疼痛行为研究的问题。您想了解什么？",
+        chat_placeholder: "询问我关于您的数据、统计或研究方法学...",
+        ask_about_data: "询问我的数据",
+        statistical_help: "统计帮助",
+        methodology_help: "方法学",
+        generating_presentation: "正在生成演示文稿",
+        please_wait_presentation: "请稍候，我们正在为您创建PowerPoint演示文稿...",
+        // Phase Configuration
+        phase_config_title: "阶段配置",
+        phase_config_desc: "自定义福尔马林测试每个阶段的时间范围。",
+        phase_1_label: "阶段1 开始：",
+        phase_1_end_label: "阶段1 结束 / 阶段2a 开始：",
+        phase_2a_end_label: "阶段2a 结束 / 阶段2b 开始：",
+        phase_2b_end_label: "阶段2b 结束：",
+        minutes: "分钟",
+        apply_config: "应用配置",
+        phase_i_desc: "由伤害感受器直接刺激引起的急性疼痛反应。",
+        phase_2a_desc: "早期慢性疼痛反应，涉及炎症过程。",
+        phase_2b_desc: "晚期慢性疼痛反应，涉及中枢敏化。",
+        // Custom Phase Mode
+        standard_mode: "标准模式（3个阶段）",
+        custom_mode: "自定义模式",
+        custom_phase_desc: "使用自定义边界定义您自己的阶段。",
+        num_phases_label: "阶段数量：",
+        continue_btn: "继续",
+        back_btn: "返回",
+        define_boundaries_desc: "定义每个连续阶段的边界。"
     }
 };
+
+// Phase Configuration Variables
+let phaseConfig = {
+    phase1: { start: 0, end: 10 },
+    phase2a: { start: 11, end: 40 },
+    phase2b: { start: 41, end: 60 }
+};
+
+let customPhases = [];
+let phaseMode = 'standard'; // 'standard' or 'custom'
+
+// Switch Phase Mode
+function switchPhaseMode(mode) {
+    phaseMode = mode;
+    const standardConfig = document.getElementById('standard-phase-config');
+    const customConfig = document.getElementById('custom-phase-config');
+    
+    if (mode === 'standard') {
+        standardConfig.style.display = 'block';
+        customConfig.style.display = 'none';
+    } else {
+        standardConfig.style.display = 'none';
+        customConfig.style.display = 'block';
+        // Reset to step 1
+        document.getElementById('custom-phase-step1').style.display = 'block';
+        document.getElementById('custom-phase-step2').style.display = 'none';
+    }
+}
+
+// Proceed to Step 2: Define Phase Boundaries
+function proceedToCustomPhaseStep2() {
+    const numPhases = parseInt(document.getElementById('num-phases').value) || 3;
+    
+    if (numPhases < 2 || numPhases > 10) {
+        alert('Please enter a number between 2 and 10.');
+        return;
+    }
+    
+    // Initialize custom phases
+    customPhases = [];
+    const interval = 60 / numPhases;
+    for (let i = 0; i < numPhases; i++) {
+        customPhases.push({
+            phaseNum: i + 1,
+            start: Math.round(i * interval),
+            end: Math.round((i + 1) * interval)
+        });
+    }
+    customPhases[customPhases.length - 1].end = 60; // Ensure last phase ends at 60
+    
+    // Show step 2 and hide step 1
+    document.getElementById('custom-phase-step1').style.display = 'none';
+    document.getElementById('custom-phase-step2').style.display = 'block';
+    
+    // Generate boundary input fields
+    generateCustomPhaseBoundaries();
+}
+
+// Back to Step 1
+function backToCustomPhaseStep1() {
+    document.getElementById('custom-phase-step2').style.display = 'none';
+    document.getElementById('custom-phase-step1').style.display = 'block';
+}
+
+// Generate Custom Phase Boundaries
+function generateCustomPhaseBoundaries() {
+    const boundariesContainer = document.getElementById('custom-phase-boundaries');
+    
+    let html = '<div class="custom-phase-grid">';
+    
+    // Generate input for each consecutive phase boundary
+    for (let i = 0; i < customPhases.length - 1; i++) {
+        html += `
+            <div class="phase-config-item">
+                <label>Phase ${i + 1} End / Phase ${i + 2} Start:</label>
+                <input type="number" id="custom-phase-${i}-boundary" 
+                       value="${customPhases[i].end}" min="0" max="60" 
+                       class="phase-input" 
+                       onchange="updateCustomPhaseBoundary(${i})">
+                <span>minutes</span>
+            </div>
+        `;
+    }
+    
+    html += '</div>';
+    
+    boundariesContainer.innerHTML = html;
+}
+
+// Update Custom Phase Boundary
+function updateCustomPhaseBoundary(index) {
+    const value = parseInt(document.getElementById(`custom-phase-${index}-boundary`).value);
+    
+    if (value < 0 || value > 60) {
+        alert('Boundary value must be between 0 and 60.');
+        return;
+    }
+    
+    // Update the boundary for this phase and the next phase
+    customPhases[index].end = value;
+    if (index < customPhases.length - 1) {
+        customPhases[index + 1].start = value;
+    }
+}
+
+// Apply Custom Phase Configuration
+function applyCustomPhaseConfig() {
+    // Validate custom phases
+    for (let i = 0; i < customPhases.length - 1; i++) {
+        if (customPhases[i].end > customPhases[i + 1].start) {
+            alert('Invalid phase configuration. Please ensure phases do not overlap and are in correct order.');
+            return;
+        }
+    }
+    
+    // Convert custom phases to standard format for compatibility
+    if (customPhases.length >= 3) {
+        phaseConfig.phase1 = { start: customPhases[0].start, end: customPhases[0].end };
+        phaseConfig.phase2a = { start: customPhases[1].start, end: customPhases[1].end };
+        phaseConfig.phase2b = { start: customPhases[2].start, end: customPhases[2].end };
+    }
+    
+    // Update display
+    updatePhaseDisplay();
+    
+    // Show success message
+    showNotification('Phase configuration updated successfully!', 'success');
+}
+
+// Sync Phase Boundaries
+function syncPhaseBoundaries() {
+    const phase1Start = parseInt(document.getElementById('phase1-start').value);
+    const phase1End = parseInt(document.getElementById('phase1-end').value);
+    const phase2aEnd = parseInt(document.getElementById('phase2a-end').value);
+    const phase2bEnd = parseInt(document.getElementById('phase2b-end').value);
+    
+    // Validate inputs
+    if (phase1Start >= phase1End || phase1End >= phase2aEnd || phase2aEnd >= phase2bEnd) {
+        return; // Invalid configuration, don't sync
+    }
+}
+
+// Apply Phase Configuration
+function applyPhaseConfig() {
+    if (phaseMode === 'standard') {
+        // Standard mode
+        const phase1Start = parseInt(document.getElementById('phase1-start').value);
+        const phase1End = parseInt(document.getElementById('phase1-end').value);
+        const phase2aEnd = parseInt(document.getElementById('phase2a-end').value);
+        const phase2bEnd = parseInt(document.getElementById('phase2b-end').value);
+        
+        // Validate inputs
+        if (phase1Start >= phase1End || phase1End >= phase2aEnd || phase2aEnd >= phase2bEnd) {
+            alert('Invalid phase configuration. Please ensure phases do not overlap and are in correct order.');
+            return;
+        }
+        
+        // Update configuration (boundaries are shared)
+        phaseConfig.phase1 = { start: phase1Start, end: phase1End };
+        phaseConfig.phase2a = { start: phase1End, end: phase2aEnd };
+        phaseConfig.phase2b = { start: phase2aEnd, end: phase2bEnd };
+    } else {
+        // Custom mode
+        // Validate custom phases
+        for (let i = 0; i < customPhases.length - 1; i++) {
+            if (customPhases[i].end > customPhases[i + 1].start) {
+                alert('Invalid phase configuration. Please ensure phases do not overlap and are in correct order.');
+                return;
+            }
+        }
+        
+        // Convert custom phases to standard format for compatibility
+        if (customPhases.length >= 3) {
+            phaseConfig.phase1 = { start: customPhases[0].start, end: customPhases[0].end };
+            phaseConfig.phase2a = { start: customPhases[1].start, end: customPhases[1].end };
+            phaseConfig.phase2b = { start: customPhases[2].start, end: customPhases[2].end };
+        }
+    }
+    
+    // Update display
+    updatePhaseDisplay();
+    
+    // Show success message
+    showNotification('Phase configuration updated successfully!', 'success');
+}
+
+// Update Phase Display
+function updatePhaseDisplay() {
+    const phase1Title = document.getElementById('phase1-title');
+    const phase1Duration = document.getElementById('phase1-duration');
+    const phase2aTitle = document.getElementById('phase2a-title');
+    const phase2aDuration = document.getElementById('phase2a-duration');
+    const phase2bTitle = document.getElementById('phase2b-title');
+    const phase2bDuration = document.getElementById('phase2b-duration');
+    
+    if (currentLanguage === 'zh') {
+        phase1Title.textContent = `测试阶段1 (${phaseConfig.phase1.start}-${phaseConfig.phase1.end}分钟)`;
+        phase1Duration.textContent = `${phaseConfig.phase1.start}-${phaseConfig.phase1.end} 分钟`;
+        phase2aTitle.textContent = `测试阶段2a (${phaseConfig.phase2a.start}-${phaseConfig.phase2a.end}分钟)`;
+        phase2aDuration.textContent = `${phaseConfig.phase2a.start}-${phaseConfig.phase2a.end} 分钟`;
+        phase2bTitle.textContent = `测试阶段2b (${phaseConfig.phase2b.start}-${phaseConfig.phase2b.end}分钟)`;
+        phase2bDuration.textContent = `${phaseConfig.phase2b.start}-${phaseConfig.phase2b.end} 分钟`;
+    } else {
+        phase1Title.textContent = `Phase 1 (${phaseConfig.phase1.start}-${phaseConfig.phase1.end} minutes)`;
+        phase1Duration.textContent = `${phaseConfig.phase1.start}-${phaseConfig.phase1.end} min`;
+        phase2aTitle.textContent = `Phase 2a (${phaseConfig.phase2a.start}-${phaseConfig.phase2a.end} minutes)`;
+        phase2aDuration.textContent = `${phaseConfig.phase2a.start}-${phaseConfig.phase2a.end} min`;
+        phase2bTitle.textContent = `Phase 2b (${phaseConfig.phase2b.start}-${phaseConfig.phase2b.end} minutes)`;
+        phase2bDuration.textContent = `${phaseConfig.phase2b.start}-${phaseConfig.phase2b.end} min`;
+    }
+}
 
 // Language switching functions
 function switchLanguage(lang) {
@@ -85,6 +480,14 @@ function switchLanguage(lang) {
         }
     });
     
+    // Translate all elements with data-translate-placeholder attribute
+    document.querySelectorAll('[data-translate-placeholder]').forEach(element => {
+        const key = element.getAttribute('data-translate-placeholder');
+        if (translations[lang] && translations[lang][key]) {
+            element.placeholder = translations[lang][key];
+        }
+    });
+    
     // Save language preference
     localStorage.setItem('selectedLanguage', lang);
     
@@ -94,6 +497,9 @@ function switchLanguage(lang) {
     } else {
         document.title = 'Formalin Test Analysis - MediPlot AI';
     }
+    
+    // Update phase display
+    updatePhaseDisplay();
 }
 
 // Load saved language preference
@@ -173,6 +579,21 @@ function switchFunction(functionName) {
     document.getElementById(`${functionName}-panel`).classList.add('active');
     
     currentFunction = functionName;
+    
+    // Translate visible content when panels are switched
+    translateVisibleContent();
+}
+
+// Translate visible content when panels are switched
+function translateVisibleContent() {
+    // Update generate button text for current mode
+    updateGenerateButtonText(currentMode);
+    
+    // Update group selection if visible
+    const groupSelectionSection = document.getElementById('group-selection-section');
+    if (groupSelectionSection && groupSelectionSection.style.display !== 'none') {
+        setupGroupSelection();
+    }
 }
 
 // Setup File Upload
@@ -431,13 +852,58 @@ function selectMode(mode) {
     }
     
     // Update generate button text
+    updateGenerateButtonText(mode);
+    
+    // Auto-generate plots/tables if data has been processed
+    if (processedData || (vehicleGroup.length > 0 || Object.keys(groupData).length > 0)) {
+        generateModeContent(mode);
+    }
+}
+
+// Update Generate Button Text
+function updateGenerateButtonText(mode) {
     const generateBtn = document.getElementById('generate-plots');
+    if (!generateBtn) return;
+    
     const modeNames = {
-        'mpe': 'MPE Analysis',
-        'phase-comparison': 'Phase Comparison',
-        'time-series': 'Time Series Plot'
+        'mpe': translations[currentLanguage].generate_mpe_analysis,
+        'phase-comparison': translations[currentLanguage].generate_phase_comparison,
+        'time-series': translations[currentLanguage].generate_time_series_plot,
+        'distribution': translations[currentLanguage].generate_distribution_plot
     };
-    generateBtn.innerHTML = `<i class="fas fa-chart-bar"></i> Generate ${modeNames[mode]}`;
+    generateBtn.innerHTML = `<i class="fas fa-chart-bar"></i> ${modeNames[mode]}`;
+}
+
+// Generate content for specific mode
+function generateModeContent(mode) {
+    // Clear existing plots
+    const plotsContainer = document.getElementById('plots-container');
+    plotsContainer.innerHTML = '<h4>Generated Analysis</h4>';
+    
+    // Generate based on selected mode
+    switch(mode) {
+        case 'mpe':
+            generateMPEPlot();
+            generateDataTables();
+            break;
+        case 'phase-comparison':
+            generatePhaseComparisonTable();
+            // Only generate Phase IIa and IIb tables in standard mode
+            if (phaseMode === 'standard') {
+                generatePhaseIIaTable();
+                generatePhaseIIbTable();
+            }
+            break;
+        case 'time-series':
+            generateTimeSeriesPlotFiltered();
+            break;
+        case 'distribution':
+            generateDistributionPlot();
+            break;
+    }
+    
+    // Show plots container
+    plotsContainer.style.display = 'block';
 }
 
 // Generate Plots
@@ -457,37 +923,15 @@ async function generatePlots() {
         // Process the uploaded file
         await processFormalinData(selectedFile);
         
-        // Clear existing plots
-        const plotsContainer = document.getElementById('plots-container');
-        plotsContainer.innerHTML = '<h4>Generated Analysis</h4>';
-        
-        // Generate based on selected mode
-        switch(currentMode) {
-            case 'mpe':
-                generateMPEPlot();
-                generateDataTables();
-                break;
-            case 'phase-comparison':
-                generatePhaseComparisonTable();
-                generatePhaseIIaTable();
-                generatePhaseIIbTable();
-                break;
-            case 'time-series':
-                generateTimeSeriesPlotFiltered();
-                break;
-            case 'distribution':
-                generateDistributionPlot();
-                break;
-        }
-        
-        // Show plots container
-        plotsContainer.style.display = 'block';
+        // Generate content for current mode
+        generateModeContent(currentMode);
         
         // Reset button
         generateBtn.innerHTML = originalText;
         generateBtn.disabled = false;
         
         // Scroll to plots
+        const plotsContainer = document.getElementById('plots-container');
         plotsContainer.scrollIntoView({ behavior: 'smooth' });
         
         // Show success message
@@ -1807,10 +2251,18 @@ function processSheetData(sheetData, sheetName) {
         }
         
         // Calculate phase-specific totals
-        const phaseI = jumpData.slice(0, 10).reduce((sum, val) => sum + val, 0); // First 10 minutes
-        const phaseIIa = jumpData.slice(10, 40).reduce((sum, val) => sum + val, 0); // 11-40 minutes
-        const phaseIIb = jumpData.slice(40, 60).reduce((sum, val) => sum + val, 0); // 41-60 minutes
-        const phaseII = phaseIIa + phaseIIb; // Total Phase II (11-60 minutes)
+        const phaseI = jumpData.slice(phaseConfig.phase1.start, phaseConfig.phase1.end + 1).reduce((sum, val) => sum + val, 0);
+        const phaseIIa = jumpData.slice(phaseConfig.phase2a.start, phaseConfig.phase2a.end + 1).reduce((sum, val) => sum + val, 0);
+        const phaseIIb = jumpData.slice(phaseConfig.phase2b.start, phaseConfig.phase2b.end + 1).reduce((sum, val) => sum + val, 0);
+        const phaseII = phaseIIa + phaseIIb;
+        
+        // Calculate custom phase data if in custom mode
+        let customPhaseData = [];
+        if (phaseMode === 'custom' && customPhases.length > 0) {
+            customPhaseData = customPhases.map(phase => {
+                return jumpData.slice(phase.start, phase.end + 1).reduce((sum, val) => sum + val, 0);
+            });
+        }
         
         mouseData[mouseId] = {
             id: mouseId,
@@ -1819,7 +2271,8 @@ function processSheetData(sheetData, sheetName) {
             phaseI: phaseI,
             phaseII: phaseII,
             phaseIIa: phaseIIa,
-            phaseIIb: phaseIIb
+            phaseIIb: phaseIIb,
+            customPhases: customPhaseData
         };
     });
     
@@ -2189,39 +2642,71 @@ function generatePhaseComparisonTable() {
     const tableContainer = document.createElement('div');
     tableContainer.className = 'table-container';
     
+    // Determine which phases to display
+    let phasesToDisplay = [];
+    if (phaseMode === 'custom' && customPhases.length > 0) {
+        // Use custom phases
+        phasesToDisplay = customPhases;
+    } else {
+        // Use standard phases (only Phase I and Phase II)
+        phasesToDisplay = [
+            { phaseNum: 1, start: phaseConfig.phase1.start, end: phaseConfig.phase1.end },
+            { phaseNum: 'II', start: phaseConfig.phase2a.start, end: phaseConfig.phase2b.end }
+        ];
+    }
+    
+    // Generate table header
+    let tableHeader = '<tr><th>Group</th>';
+    phasesToDisplay.forEach(phase => {
+        tableHeader += `<th>Phase ${phase.phaseNum} (${phase.start}-${phase.end} min)<br>Average Jumps ± SD</th>`;
+    });
+    tableHeader += '<th>Number of Mice</th></tr>';
+    
+    // Generate table rows
     let tableRows = '';
     Object.keys(allGroups).forEach(groupName => {
         const groupMice = allGroups[groupName];
-        const phaseIAvg = groupMice.reduce((sum, mouse) => sum + mouse.phaseI, 0) / groupMice.length;
-        const phaseIIAvg = groupMice.reduce((sum, mouse) => sum + mouse.phaseII, 0) / groupMice.length;
+        let row = `<td>${getDisplayName(groupName)}</td>`;
         
-        // Calculate standard deviations
-        const phaseIValues = groupMice.map(mouse => mouse.phaseI);
-        const phaseIIValues = groupMice.map(mouse => mouse.phaseII);
+        phasesToDisplay.forEach((phase, index) => {
+            // Calculate average and std dev for this phase
+            let phaseValues = [];
+            if (phaseMode === 'custom') {
+                // For custom phases, calculate based on custom phase data
+                phaseValues = groupMice.map(mouse => {
+                    const phaseData = mouse.customPhases ? mouse.customPhases[index] : 0;
+                    return phaseData;
+                });
+            } else {
+                // For standard mode
+                if (index === 0) {
+                    phaseValues = groupMice.map(mouse => mouse.phaseI);
+                } else {
+                    phaseValues = groupMice.map(mouse => mouse.phaseII);
+                }
+            }
+            
+            const avg = phaseValues.reduce((sum, val) => sum + val, 0) / phaseValues.length;
+            const stdDev = Math.sqrt(phaseValues.reduce((sum, val) => sum + Math.pow(val - avg, 2), 0) / phaseValues.length);
+            
+            row += `<td>${avg.toFixed(1)} ± ${stdDev.toFixed(1)}</td>`;
+        });
         
-        const phaseIStdDev = Math.sqrt(phaseIValues.reduce((sum, val) => sum + Math.pow(val - phaseIAvg, 2), 0) / phaseIValues.length);
-        const phaseIIStdDev = Math.sqrt(phaseIIValues.reduce((sum, val) => sum + Math.pow(val - phaseIIAvg, 2), 0) / phaseIIValues.length);
-        
-        tableRows += `
-            <tr>
-                <td>${getDisplayName(groupName)}</td>
-                <td>${phaseIAvg.toFixed(1)} ± ${phaseIStdDev.toFixed(1)}</td>
-                <td>${phaseIIAvg.toFixed(1)} ± ${phaseIIStdDev.toFixed(1)}</td>
-                <td>${groupMice.length}</td>
-            </tr>
-        `;
+        row += `<td>${groupMice.length}</td>`;
+        tableRows += `<tr>${row}</tr>`;
+    });
+    
+    // Generate phase definitions
+    let phaseDefinitions = '';
+    phasesToDisplay.forEach(phase => {
+        phaseDefinitions += `<p><strong>Phase ${phase.phaseNum}:</strong> Minutes ${phase.start}-${phase.end}</p>`;
     });
     
     tableContainer.innerHTML = `
         <h5><i class="fas fa-balance-scale"></i> Phase Comparison Analysis</h5>
         <table class="data-table">
             <thead>
-                <tr>
-                    <th>Group</th>
-                    <th>Phase I (0-10 min)<br>Average Jumps ± SD</th>
-                    <th>Phase II (11-60 min)<br>Average Jumps ± SD</th>
-                    <th>Number of Mice</th>
-                </tr>
+                ${tableHeader}
             </thead>
             <tbody>
                 ${tableRows}
@@ -2230,8 +2715,7 @@ function generatePhaseComparisonTable() {
         
         <div class="table-summary">
             <h6>Phase Definitions:</h6>
-            <p><strong>Phase I:</strong> Acute pain response (minutes 0-10)</p>
-            <p><strong>Phase II:</strong> Chronic pain response (minutes 11-60)</p>
+            ${phaseDefinitions}
             <p><strong>Calculation:</strong> Sum of jumps within each time period</p>
         </div>
     `;
@@ -2266,12 +2750,12 @@ function generatePhaseIIaTable() {
     });
     
     tableContainer.innerHTML = `
-        <h5><i class="fas fa-clock"></i> Phase IIa Analysis (11-40 minutes)</h5>
+        <h5><i class="fas fa-clock"></i> Phase IIa Analysis (${phaseConfig.phase2a.start}-${phaseConfig.phase2a.end} minutes)</h5>
         <table class="data-table">
             <thead>
                 <tr>
                     <th>Group</th>
-                    <th>Phase IIa (11-40 min)<br>Average Jumps ± SD</th>
+                    <th>Phase IIa (${phaseConfig.phase2a.start}-${phaseConfig.phase2a.end} min)<br>Average Jumps ± SD</th>
                     <th>Number of Mice</th>
                 </tr>
             </thead>
@@ -2282,9 +2766,9 @@ function generatePhaseIIaTable() {
         
         <div class="table-summary">
             <h6>Phase IIa Details:</h6>
-            <p><strong>Time Period:</strong> Minutes 11-40 (30 minutes)</p>
+            <p><strong>Time Period:</strong> Minutes ${phaseConfig.phase2a.start}-${phaseConfig.phase2a.end} (${phaseConfig.phase2a.end - phaseConfig.phase2a.start} minutes)</p>
             <p><strong>Biological Significance:</strong> Early chronic pain response</p>
-            <p><strong>Calculation:</strong> Sum of jumps from minute 11 to minute 40</p>
+            <p><strong>Calculation:</strong> Sum of jumps from minute ${phaseConfig.phase2a.start} to minute ${phaseConfig.phase2a.end}</p>
         </div>
     `;
     
@@ -2318,12 +2802,12 @@ function generatePhaseIIbTable() {
     });
     
     tableContainer.innerHTML = `
-        <h5><i class="fas fa-stopwatch"></i> Phase IIb Analysis (41-60 minutes)</h5>
+        <h5><i class="fas fa-stopwatch"></i> Phase IIb Analysis (${phaseConfig.phase2b.start}-${phaseConfig.phase2b.end} minutes)</h5>
         <table class="data-table">
             <thead>
                 <tr>
                     <th>Group</th>
-                    <th>Phase IIb (41-60 min)<br>Average Jumps ± SD</th>
+                    <th>Phase IIb (${phaseConfig.phase2b.start}-${phaseConfig.phase2b.end} min)<br>Average Jumps ± SD</th>
                     <th>Number of Mice</th>
                 </tr>
             </thead>
@@ -2334,9 +2818,9 @@ function generatePhaseIIbTable() {
         
         <div class="table-summary">
             <h6>Phase IIb Details:</h6>
-            <p><strong>Time Period:</strong> Minutes 41-60 (20 minutes)</p>
+            <p><strong>Time Period:</strong> Minutes ${phaseConfig.phase2b.start}-${phaseConfig.phase2b.end} (${phaseConfig.phase2b.end - phaseConfig.phase2b.start} minutes)</p>
             <p><strong>Biological Significance:</strong> Late chronic pain response</p>
-            <p><strong>Calculation:</strong> Sum of jumps from minute 41 to minute 60</p>
+            <p><strong>Calculation:</strong> Sum of jumps from minute ${phaseConfig.phase2b.start} to minute ${phaseConfig.phase2b.end}</p>
         </div>
     `;
     
@@ -2507,6 +2991,76 @@ function drawTimeSeriesPlot(allGroups) {
             ctx.fill();
         });
     });
+    
+    // Draw phase backgrounds and labels
+    const phaseColors = ['rgba(255, 107, 107, 0.2)', 'rgba(107, 142, 234, 0.2)', 'rgba(255, 206, 84, 0.2)', 'rgba(75, 192, 192, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(255, 159, 64, 0.2)', 'rgba(199, 199, 199, 0.2)', 'rgba(83, 102, 255, 0.2)', 'rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)'];
+    const phaseBorderColors = ['#ff6b6b', '#6b8eea', '#ffce54', '#4bc0c0', '#9966ff', '#ff9f40', '#c7c7c7', '#5366ff', '#ff6384', '#36a2eb'];
+    
+    if (phaseMode === 'custom' && customPhases.length > 0) {
+        // Draw custom phase backgrounds
+        customPhases.forEach((phase, index) => {
+            const xStart = scaleX(phase.start);
+            const xEnd = scaleX(phase.end);
+            const phaseWidth = xEnd - xStart;
+            
+            // Draw background
+            ctx.fillStyle = phaseColors[index % phaseColors.length];
+            ctx.fillRect(xStart, margin.top, phaseWidth, plotHeight);
+            
+            // Draw border
+            ctx.strokeStyle = phaseBorderColors[index % phaseBorderColors.length];
+            ctx.lineWidth = 2;
+            ctx.strokeRect(xStart, margin.top, phaseWidth, plotHeight);
+            
+            // Draw phase label
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 12px Inter';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const labelX = xStart + phaseWidth / 2;
+            const labelY = margin.top + 20;
+            ctx.fillText(`Phase ${phase.phaseNum}`, labelX, labelY);
+            
+            // Draw time range
+            ctx.font = '10px Inter';
+            ctx.fillText(`${phase.start}-${phase.end} min`, labelX, labelY + 15);
+        });
+    } else {
+        // Draw standard phase backgrounds
+        const phases = [
+            { name: 'Phase I', start: phaseConfig.phase1.start, end: phaseConfig.phase1.end },
+            { name: 'Phase IIa', start: phaseConfig.phase2a.start, end: phaseConfig.phase2a.end },
+            { name: 'Phase IIb', start: phaseConfig.phase2b.start, end: phaseConfig.phase2b.end }
+        ];
+        
+        phases.forEach((phase, index) => {
+            const xStart = scaleX(phase.start);
+            const xEnd = scaleX(phase.end);
+            const phaseWidth = xEnd - xStart;
+            
+            // Draw background
+            ctx.fillStyle = phaseColors[index % phaseColors.length];
+            ctx.fillRect(xStart, margin.top, phaseWidth, plotHeight);
+            
+            // Draw border
+            ctx.strokeStyle = phaseBorderColors[index % phaseBorderColors.length];
+            ctx.lineWidth = 2;
+            ctx.strokeRect(xStart, margin.top, phaseWidth, plotHeight);
+            
+            // Draw phase label
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 12px Inter';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const labelX = xStart + phaseWidth / 2;
+            const labelY = margin.top + 20;
+            ctx.fillText(phase.name, labelX, labelY);
+            
+            // Draw time range
+            ctx.font = '10px Inter';
+            ctx.fillText(`${phase.start}-${phase.end} min`, labelX, labelY + 15);
+        });
+    }
     
     // Draw axes
     ctx.strokeStyle = '#333';
