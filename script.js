@@ -2365,7 +2365,7 @@ function generateMPEPlot() {
     plotContainer.innerHTML = `
         <div class="plot-header">
             <h4>MPE (Maximum Possible Effect) Bar Plot</h4>
-            <p>Comparison of pain response across groups with Standard Deviation</p>
+            <p>Group-wise MPE comparison (values shown as percentages)</p>
         </div>
         <div class="plot-content">
             <canvas id="mpe-plot" width="800" height="400"></canvas>
@@ -2403,8 +2403,34 @@ function drawMPEPlot(mpeData) {
     
     // Get group names and MPE values
     const groups = Object.keys(mpeData.groupMPEs);
-    const mpeValues = groups.map(group => mpeData.groupMPEs[group].groupMPE);
-    const stdDevValues = groups.map(group => mpeData.groupMPEs[group].stdDev);
+    const mpePercentValues = groups.map(group => mpeData.groupMPEs[group].groupMPE * 100);
+
+    // Assign colors (controls fixed, drug groups varied)
+    const controlColors = {
+        'Vehicle': '#4CAF50',
+        'Sham': '#2196F3'
+    };
+    const experimentalPalette = [
+        '#e74c3c',
+        '#9b59b6',
+        '#f39c12',
+        '#16a085',
+        '#e67e22',
+        '#34495e',
+        '#1abc9c',
+        '#d35400'
+    ];
+    let experimentalIndex = 0;
+    const groupColors = {};
+
+    groups.forEach(group => {
+        if (controlColors[group]) {
+            groupColors[group] = controlColors[group];
+        } else {
+            groupColors[group] = experimentalPalette[experimentalIndex % experimentalPalette.length];
+            experimentalIndex += 1;
+        }
+    });
     
     // Calculate bar width and spacing
     const barWidth = plotWidth / (groups.length + 1);
@@ -2412,73 +2438,35 @@ function drawMPEPlot(mpeData) {
     const actualBarWidth = barWidth - barSpacing;
     
     // Find min and max values for scaling (including error bars)
-    const minMPE = Math.min(...mpeValues.map((mpe, i) => mpe - stdDevValues[i]));
-    const maxMPE = Math.max(...mpeValues.map((mpe, i) => mpe + stdDevValues[i]));
+    const minMPE = Math.min(0, Math.min(...mpePercentValues));
+    const maxMPE = Math.max(100, Math.max(...mpePercentValues));
     const range = maxMPE - minMPE;
-    const padding = range * 0.15; // Increased padding for error bars
+    const padding = Math.max(5, range * 0.05);
     
     // Scale function
     const scaleY = (value) => {
         return margin.top + plotHeight - ((value - minMPE + padding) / (range + 2 * padding)) * plotHeight;
     };
     
-    // Draw bars with error bars
+    // Draw bars
     groups.forEach((group, index) => {
         const x = margin.left + index * barWidth + barSpacing / 2;
-        const barHeight = (mpeData.groupMPEs[group].groupMPE - minMPE + padding) / (range + 2 * padding) * plotHeight;
-        const y = scaleY(mpeData.groupMPEs[group].groupMPE);
-        
-        // Choose color based on group
-        let color;
-        if (group === 'Vehicle') {
-            color = '#4CAF50';
-        } else if (group === 'Sham') {
-            color = '#2196F3';
-        } else {
-            color = '#667eea';
-        }
+        const barHeight = (mpePercentValues[index] - minMPE + padding) / (range + 2 * padding) * plotHeight;
+        const y = scaleY(mpePercentValues[index]);
+        const color = groupColors[group];
         
         // Draw bar
         ctx.fillStyle = color;
         ctx.fillRect(x, y, actualBarWidth, barHeight);
         
-        // Draw error bar
-        const errorBarY = scaleY(mpeData.groupMPEs[group].groupMPE + stdDevValues[index]);
-        const errorBarHeight = scaleY(mpeData.groupMPEs[group].groupMPE - stdDevValues[index]) - errorBarY;
-        
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 2;
-        
-        // Vertical error bar line
-        ctx.beginPath();
-        ctx.moveTo(x + actualBarWidth / 2, errorBarY);
-        ctx.lineTo(x + actualBarWidth / 2, errorBarY + errorBarHeight);
-        ctx.stroke();
-        
-        // Top error bar cap
-        ctx.beginPath();
-        ctx.moveTo(x + actualBarWidth / 2 - 5, errorBarY);
-        ctx.lineTo(x + actualBarWidth / 2 + 5, errorBarY);
-        ctx.stroke();
-        
-        // Bottom error bar cap
-        ctx.beginPath();
-        ctx.moveTo(x + actualBarWidth / 2 - 5, errorBarY + errorBarHeight);
-        ctx.lineTo(x + actualBarWidth / 2 + 5, errorBarY + errorBarHeight);
-        ctx.stroke();
-        
-        // Add std dev value below error bar
+        // Add group name
         ctx.fillStyle = '#666';
         ctx.font = '12px Inter';
-        ctx.textAlign = 'center';
-        ctx.fillText(`±${stdDevValues[index].toFixed(3)}`, x + actualBarWidth / 2, errorBarY + errorBarHeight + 15);
-        
-        // Add group name
         ctx.fillText(getDisplayName(group), x + actualBarWidth / 2, height - margin.bottom + 20);
         
         // Add MPE value on top of bar
         ctx.fillStyle = '#333';
-        ctx.fillText(mpeData.groupMPEs[group].groupMPE.toFixed(3), x + actualBarWidth / 2, y - 5);
+        ctx.fillText(`${mpePercentValues[index].toFixed(1)}%`, x + actualBarWidth / 2, y - 5);
     });
     
     // Draw axes
@@ -2504,7 +2492,7 @@ function drawMPEPlot(mpeData) {
     ctx.fillStyle = '#333';
     ctx.font = '14px Inter';
     ctx.textAlign = 'center';
-    ctx.fillText('MPE Value', 0, 0);
+    ctx.fillText('MPE (%)', 0, 0);
     ctx.restore();
     
     // X-axis label
@@ -2531,32 +2519,21 @@ function drawMPEPlot(mpeData) {
         ctx.fillStyle = '#666';
         ctx.font = '12px Inter';
         ctx.textAlign = 'right';
-        ctx.fillText(value.toFixed(2), margin.left - 10, y + 4);
+        ctx.fillText(`${value.toFixed(0)}%`, margin.left - 10, y + 4);
     }
     
     // Add legend
-    const legendY = margin.top + 20;
-    const legendX = width - margin.right - 150;
-    
-    // Vehicle legend
-    ctx.fillStyle = '#4CAF50';
-    ctx.fillRect(legendX, legendY, 15, 15);
-    ctx.fillStyle = '#333';
+    const legendX = width - margin.right - 180;
+    let legendY = margin.top + 10;
     ctx.font = '12px Inter';
     ctx.textAlign = 'left';
-    ctx.fillText('Vehicle', legendX + 20, legendY + 12);
     
-    // Sham legend
-    ctx.fillStyle = '#2196F3';
-    ctx.fillRect(legendX, legendY + 25, 15, 15);
-    ctx.fillStyle = '#333';
-    ctx.fillText('Sham', legendX + 20, legendY + 37);
-    
-    // Experimental legend
-    ctx.fillStyle = '#667eea';
-    ctx.fillRect(legendX, legendY + 50, 15, 15);
-    ctx.fillStyle = '#333';
-    ctx.fillText('Experimental', legendX + 20, legendY + 62);
+    groups.forEach((group, index) => {
+        ctx.fillStyle = groupColors[group];
+        ctx.fillRect(legendX, legendY + index * 20, 15, 15);
+        ctx.fillStyle = '#333';
+        ctx.fillText(getDisplayName(group), legendX + 20, legendY + index * 20 + 12);
+    });
 }
 
 // Generate Data Tables
