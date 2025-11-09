@@ -729,6 +729,10 @@ function createGroupNameInputs() {
     
     if (!groupNamesGrid || !groupNamesSection) return;
     
+    const sanitizeId = (name) => {
+        return `group-${normalizeGroupLabel(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') || 'unnamed'}`;
+    };
+    
     // Clear existing inputs
     groupNamesGrid.innerHTML = '';
     
@@ -745,12 +749,12 @@ function createGroupNameInputs() {
     
     // Create input for each detected group
     detectedGroups.forEach(groupName => {
-        const groupNumber = groupName.replace('Group', '');
+        const inputId = sanitizeId(groupName);
         const groupField = document.createElement('div');
         groupField.className = 'group-name-field';
         groupField.innerHTML = `
-            <label for="${groupName.toLowerCase()}-name">${groupName} Name</label>
-            <input type="text" id="${groupName.toLowerCase()}-name" placeholder="Enter custom name for ${groupName} (optional)" onchange="updateGroupNames()">
+            <label for="${inputId}">${groupName} Name</label>
+            <input type="text" id="${inputId}" data-group-key="${groupName}" placeholder="Enter custom name for ${groupName} (optional)" onchange="updateGroupNames()">
         `;
         groupNamesGrid.appendChild(groupField);
     });
@@ -778,10 +782,12 @@ function updateGroupNames() {
     customGroupNames = {};
     
     // Update experimental groups
-    Object.keys(groupData).forEach(groupName => {
-        const input = document.getElementById(`${groupName.toLowerCase()}-name`);
-        if (input && input.value.trim()) {
-            customGroupNames[groupName] = input.value.trim();
+    const groupInputs = document.querySelectorAll('input[data-group-key]');
+    groupInputs.forEach(input => {
+        const groupKey = input.getAttribute('data-group-key');
+        if (!groupKey) return;
+        if (input.value && input.value.trim()) {
+            customGroupNames[groupKey] = input.value.trim();
         }
     });
     
@@ -2139,11 +2145,10 @@ async function processCSVFile(file) {
         reader.onload = function(e) {
             try {
                 const csvText = e.target.result;
-                const lines = csvText.split('\n');
+                const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== '');
+                const sheetData = lines.map(line => line.split(',').map(cell => cell.trim()));
                 
-                // For CSV, we assume it's a single sheet format
-                // You might need to adjust this based on your actual CSV structure
-                processSheetData(lines, 'Group1');
+                processSheetData(sheetData, 'CSV');
                 resolve();
             } catch (error) {
                 reject(error);
@@ -2168,23 +2173,34 @@ async function processExcelFile(file) {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
                 
-                // Process each sheet that starts with "Group"
-                const groupSheets = workbook.SheetNames.filter(name => name.toLowerCase().startsWith('group'));
-                
-                if (groupSheets.length === 0) {
-                    throw new Error('No sheets starting with "Group" found in the Excel file');
+                if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+                    throw new Error('No sheets found in the Excel file');
                 }
                 
-                groupSheets.forEach(sheetName => {
+                let totalProcessedSamples = 0;
+                const targetSheets = workbook.SheetNames.filter(name => name && name.trim() === '数据处理');
+                
+                if (targetSheets.length === 0) {
+                    throw new Error('Sheet named "数据处理" was not found in the Excel file.');
+                }
+                
+                targetSheets.forEach(sheetName => {
                     try {
                         const worksheet = workbook.Sheets[sheetName];
-                        const sheetData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                        processSheetData(sheetData, sheetName);
+                        if (!worksheet) return;
+                        
+                        const sheetData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false });
+                        const processedCount = processSheetData(sheetData, sheetName);
+                        totalProcessedSamples += processedCount;
                     } catch (error) {
-                        console.warn(`Warning: Sheet ${sheetName} has missing values and will be skipped`);
-                        showNotification(`Warning: Sheet ${sheetName} has missing values and will be skipped`, 'warning');
+                        console.warn(`Warning: Sheet ${sheetName} could not be processed (${error.message})`);
+                        showNotification(`Warning: Sheet ${sheetName} could not be processed (${error.message})`, 'warning');
                     }
                 });
+                
+                if (totalProcessedSamples === 0) {
+                    throw new Error('No usable data columns were detected in the Excel file.');
+                }
                 
                 resolve();
             } catch (error) {
@@ -2200,113 +2216,232 @@ async function processExcelFile(file) {
     });
 }
 
+// Helpers for merged formalin sheets
+function isMetadataCell(value) {
+    if (typeof value !== 'string') return false;
+    const normalized = value.replace(/；/g, ';').toLowerCase();
+    const collapsed = normalized.replace(/\s+/g, '');
+    return collapsed.includes('date=') && collapsed.includes('time=') && collapsed.includes('id=') && collapsed.includes('study');
+}
+
+function parseMetadataCell(value) {
+    if (typeof value !== 'string') return {};
+    const normalized = value.replace(/；/g, ';').replace(/\r/g, '\n');
+    const tokens = normalized.split(/[\n;]+/).map(token => token.trim()).filter(token => token.length > 0);
+    const metadata = {};
+    let pendingKey = null;
+    
+    tokens.forEach(token => {
+        if (token.includes('=')) {
+            const [rawKey, rawVal] = token.split('=');
+            const key = rawKey ? rawKey.trim().toLowerCase() : '';
+            const valuePart = rawVal ? rawVal.trim() : '';
+            
+            if (key && valuePart) {
+                if (key === 'date') metadata.date = valuePart;
+                if (key === 'time') metadata.time = valuePart;
+                if (key === 'id' || key === 'id#') metadata.id = valuePart;
+                if (key === 'study#' || key === 'study') metadata.study = valuePart;
+                pendingKey = null;
+            } else if (key && !valuePart) {
+                pendingKey = key;
+            }
+        } else if (pendingKey) {
+            if (pendingKey === 'date') metadata.date = token;
+            if (pendingKey === 'time') metadata.time = token;
+            if (pendingKey === 'id' || pendingKey === 'id#') metadata.id = token;
+            if (pendingKey === 'study#' || pendingKey === 'study') metadata.study = token;
+            pendingKey = null;
+        }
+    });
+        
+    if (pendingKey) {
+        // Last token might be the value when no delimiter exists
+        const lastToken = tokens[tokens.length - 1];
+        if (lastToken) {
+            if (pendingKey === 'date') metadata.date = lastToken;
+            if (pendingKey === 'time') metadata.time = lastToken;
+            if (pendingKey === 'id' || pendingKey === 'id#') metadata.id = lastToken;
+            if (pendingKey === 'study#' || pendingKey === 'study') metadata.study = lastToken;
+        }
+    }
+    
+    return metadata;
+}
+
+function normalizeGroupLabel(labelText) {
+    if (!labelText && labelText !== 0) return 'Unlabeled Group';
+    return String(labelText).trim() || 'Unlabeled Group';
+}
+
+function classifyGroupLabel(labelText) {
+    const normalized = normalizeGroupLabel(labelText).toLowerCase();
+    
+    if (normalized.includes('vehicle') || normalized.includes('载体')) {
+        return 'vehicle';
+    }
+    if (normalized.includes('sham') || normalized.includes('假手术')) {
+        return 'sham';
+    }
+    
+    return 'experiment';
+}
+
+function ensureGroupEntry(labelText) {
+    const label = normalizeGroupLabel(labelText);
+    if (!groupData[label]) {
+        groupData[label] = [];
+    }
+    return label;
+}
+
+function extractJumpDataFromColumn(sheetData, columnIndex) {
+    const jumpData = [];
+    let totalJumps = 0;
+    
+    for (let row = 1; row < sheetData.length; row++) {
+        const rowCells = sheetData[row] || [];
+        let rawValue = rowCells[columnIndex];
+        
+        if (rawValue === null || rawValue === undefined || rawValue === '') {
+            jumpData.push(0);
+            continue;
+        }
+        
+        if (typeof rawValue === 'string') {
+            rawValue = rawValue.replace(/,/g, '.').trim();
+        }
+        
+        const numericValue = parseFloat(rawValue);
+        if (isNaN(numericValue)) {
+            jumpData.push(0);
+            continue;
+        }
+        
+        jumpData.push(numericValue);
+        totalJumps += numericValue;
+    }
+    
+    return { jumpData, totalJumps };
+}
+
+function calculatePhaseSum(jumpData, start, end) {
+    if (!Array.isArray(jumpData) || jumpData.length === 0) return 0;
+    const safeStart = Math.max(start, 0);
+    const safeEnd = Math.min(end, jumpData.length - 1);
+    
+    if (safeStart > safeEnd) return 0;
+    
+    let sum = 0;
+    for (let i = safeStart; i <= safeEnd; i++) {
+        sum += jumpData[i] || 0;
+    }
+    return sum;
+}
+
+function buildSampleFromColumn(sheetData, columnIndex, groupLabel, metadataText) {
+    const label = normalizeGroupLabel(groupLabel);
+    const metadata = metadataText ? parseMetadataCell(metadataText) : {};
+    const { jumpData, totalJumps } = extractJumpDataFromColumn(sheetData, columnIndex);
+    
+    if (!jumpData.some(value => value !== 0)) {
+        return null;
+    }
+    
+    const phaseI = calculatePhaseSum(jumpData, phaseConfig.phase1.start, phaseConfig.phase1.end);
+    const phaseIIa = calculatePhaseSum(jumpData, phaseConfig.phase2a.start, phaseConfig.phase2a.end);
+    const phaseIIb = calculatePhaseSum(jumpData, phaseConfig.phase2b.start, phaseConfig.phase2b.end);
+    const phaseII = phaseIIa + phaseIIb;
+    
+    let customPhaseData = [];
+    if (phaseMode === 'custom' && customPhases.length > 0) {
+        customPhaseData = customPhases.map(phase => calculatePhaseSum(jumpData, phase.start, phase.end));
+    }
+    
+    const rawId = metadata.id || `${label}-C${columnIndex + 1}`;
+    const numericId = parseInt(rawId, 10);
+    const sampleId = isNaN(numericId) ? rawId : numericId;
+    
+    return {
+        id: sampleId,
+        totalJumps,
+        jumpData,
+        phaseI,
+        phaseII,
+        phaseIIa,
+        phaseIIb,
+        customPhases: customPhaseData,
+        metadata: {
+            ...metadata,
+            group: label,
+            columnIndex
+        }
+    };
+}
+
+function addSampleToCollections(sample, groupLabel) {
+    if (!sample) return 0;
+    
+    const classification = classifyGroupLabel(groupLabel);
+    
+    if (classification === 'vehicle') {
+        vehicleGroup.push(sample);
+        return 1;
+    }
+    
+    if (classification === 'sham') {
+        shamGroup.push(sample);
+        return 1;
+    }
+    
+    const label = ensureGroupEntry(groupLabel);
+    groupData[label].push(sample);
+    return 1;
+}
+
 // Process Individual Sheet Data
 function processSheetData(sheetData, sheetName) {
-    if (!sheetData || sheetData.length < 60) {
-        throw new Error(`Sheet ${sheetName} has insufficient data (need at least 60 rows)`);
+    if (!sheetData || sheetData.length < 2) {
+        throw new Error(`Sheet ${sheetName} has insufficient data (need headers and at least one data row)`);
     }
     
-    // Extract column headers (first row)
-    const headers = sheetData[0];
-    const mouseColumns = [];
+    const totalColumns = sheetData.reduce((max, row) => {
+        if (!row) return max;
+        return Math.max(max, row.length);
+    }, 0);
     
-    // Find columns with mouse data (extract IDs from column names)
-    headers.forEach((header, index) => {
-        if (header && typeof header === 'string' && header.includes('ID =')) {
-            const idMatch = header.match(/ID\s*=\s*(\d+)/i);
-            if (idMatch) {
-                const mouseId = parseInt(idMatch[1]);
-                mouseColumns.push({
-                    index: index,
-                    id: mouseId,
-                    header: header
-                });
-            }
-        }
-    });
-    
-    if (mouseColumns.length === 0) {
-        throw new Error(`No mouse data columns found in sheet ${sheetName}`);
+    if (totalColumns === 0) {
+        throw new Error(`Sheet ${sheetName} does not contain any columns to process`);
     }
     
-    // Process each mouse's data (first 60 rows)
-    const mouseData = {};
-    mouseColumns.forEach(mouseCol => {
-        const mouseId = mouseCol.id;
-        const columnIndex = mouseCol.index;
+    const headerRow = sheetData[0] || [];
+    let currentGroupLabel = null;
+    let processedSampleCount = 0;
+    
+    for (let col = 0; col < totalColumns; col++) {
+        const headerCell = headerRow[col];
+        const hasHeaderText = headerCell !== null && headerCell !== undefined && headerCell !== '';
+        const headerText = hasHeaderText ? String(headerCell).trim() : '';
+        const columnHasMetadata = isMetadataCell(headerText);
         
-        let totalJumps = 0;
-        const jumpData = [];
-        
-        // Sum jumps for first 60 rows
-        for (let row = 1; row <= 60 && row < sheetData.length; row++) {
-            const value = sheetData[row][columnIndex];
-            if (value !== null && value !== undefined && value !== '') {
-                const jumpCount = parseFloat(value);
-                if (!isNaN(jumpCount)) {
-                    totalJumps += jumpCount;
-                    jumpData.push(jumpCount);
-                }
-            }
+        if (hasHeaderText && !columnHasMetadata) {
+            currentGroupLabel = normalizeGroupLabel(headerText);
         }
         
-        // Calculate phase-specific totals
-        const phaseI = jumpData.slice(phaseConfig.phase1.start, phaseConfig.phase1.end + 1).reduce((sum, val) => sum + val, 0);
-        const phaseIIa = jumpData.slice(phaseConfig.phase2a.start, phaseConfig.phase2a.end + 1).reduce((sum, val) => sum + val, 0);
-        const phaseIIb = jumpData.slice(phaseConfig.phase2b.start, phaseConfig.phase2b.end + 1).reduce((sum, val) => sum + val, 0);
-        const phaseII = phaseIIa + phaseIIb;
+        const labelForColumn = currentGroupLabel || normalizeGroupLabel('');
+        const sample = buildSampleFromColumn(
+            sheetData,
+            col,
+            labelForColumn,
+            columnHasMetadata ? headerText : null
+        );
         
-        // Calculate custom phase data if in custom mode
-        let customPhaseData = [];
-        if (phaseMode === 'custom' && customPhases.length > 0) {
-            customPhaseData = customPhases.map(phase => {
-                return jumpData.slice(phase.start, phase.end + 1).reduce((sum, val) => sum + val, 0);
-            });
+        if (sample) {
+            processedSampleCount += addSampleToCollections(sample, labelForColumn);
         }
-        
-        mouseData[mouseId] = {
-            id: mouseId,
-            totalJumps: totalJumps,
-            jumpData: jumpData,
-            phaseI: phaseI,
-            phaseII: phaseII,
-            phaseIIa: phaseIIa,
-            phaseIIb: phaseIIb,
-            customPhases: customPhaseData
-        };
-    });
+    }
     
-    // Determine group number from sheet name
-    const groupMatch = sheetName.match(/group\s*(\d+)/i);
-    const groupNumber = groupMatch ? parseInt(groupMatch[1]) : 1;
-    
-    // Separate mice into groups based on ID rules
-    const groupMice = [];
-    const vehicleMice = [];
-    const shamMice = [];
-    
-    Object.values(mouseData).forEach(mouse => {
-        const id = mouse.id;
-        const idInGroup = ((id - 1) % 8) + 1;
-        
-        if (idInGroup >= 1 && idInGroup <= 6) {
-            // Belongs to the main group
-            groupMice.push(mouse);
-        } else if (idInGroup === 7) {
-            // Vehicle group
-            vehicleMice.push(mouse);
-        } else if (idInGroup === 8) {
-            // Sham group
-            shamMice.push(mouse);
-        }
-    });
-    
-    // Store group data
-    groupData[`Group${groupNumber}`] = groupMice;
-    
-    // Add to vehicle and sham groups
-    vehicleGroup.push(...vehicleMice);
-    shamGroup.push(...shamMice);
+    return processedSampleCount;
 }
 
 // Calculate MPE Values
