@@ -970,6 +970,23 @@ let isModalCentered = true;
 let selectedGroupsForPlot = new Set();
 let allGroups = new Set();
 
+function ensureAllGroupsSelected() {
+    selectedGroupsForPlot.clear();
+    const combinedGroups = { ...groupData, 'Vehicle': vehicleGroup, 'Sham': shamGroup };
+    Object.keys(combinedGroups).forEach(groupName => {
+        const groupMice = combinedGroups[groupName];
+        if (Array.isArray(groupMice) && groupMice.length > 0) {
+            selectedGroupsForPlot.add(groupName);
+        }
+    });
+
+    const checkboxes = document.querySelectorAll('#group-selection-grid input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        const groupName = checkbox.getAttribute('data-group-name') || checkbox.dataset.groupName || checkbox.id.replace('select-', '');
+        checkbox.checked = selectedGroupsForPlot.has(groupName);
+    });
+}
+
 // Open Chatbot Modal
 function openChatbot() {
     if (!selectedFile) {
@@ -1747,9 +1764,10 @@ async function generatePPT() {
     try {
         // Prepare presentation data
         const presentationData = await preparePresentationData(labName, researcherName, experimentDate);
+        const plotImages = capturePlotSnapshots();
         
         // Generate PowerPoint content
-        const pptContent = generatePowerPointContent(presentationData);
+        const pptContent = generatePowerPointContent(presentationData, plotImages);
         
         // Create and download the presentation
         downloadPresentation(pptContent, `Formalin_Test_Analysis_${experimentDate.replace(/-/g, '_')}.html`);
@@ -1765,6 +1783,72 @@ async function generatePPT() {
         showNotification('PPT generation failed: ' + error.message, 'error');
         pptStatus.style.display = 'none';
     }
+}
+
+function capturePlotSnapshots() {
+    const plotsContainer = document.getElementById('plots-container');
+    if (!plotsContainer) {
+        return [];
+    }
+
+    const snapshots = [];
+    const originalMode = currentMode;
+    const originalVisibility = plotsContainer.style.visibility;
+    const originalScroll = window.scrollY;
+
+    const plotConfigs = [
+        {
+            mode: 'mpe',
+            canvasId: 'mpe-plot',
+            title: 'MPE (Maximum Possible Effect) Bar Plot',
+            description: 'Maximum Possible Effect comparison across all experimental groups.'
+        },
+        {
+            mode: 'time-series',
+            canvasId: 'time-series-plot',
+            title: 'Time Series Analysis (Selected Groups)',
+            description: 'Average jumps per minute for selected groups over the 60-minute observation period.'
+        },
+        {
+            mode: 'distribution',
+            canvasId: 'distribution-plot',
+            title: 'Distribution of Samples',
+            description: 'Individual mouse total jumps with mean and variability visualization.'
+        }
+    ];
+
+    plotsContainer.style.visibility = 'hidden';
+
+    plotConfigs.forEach(config => {
+        selectMode(config.mode);
+        if (config.mode === 'time-series' || config.mode === 'distribution') {
+            ensureAllGroupsSelected();
+        }
+        generateModeContent(config.mode);
+
+        const canvas = document.getElementById(config.canvasId);
+        if (canvas && typeof canvas.toDataURL === 'function') {
+            try {
+                const dataUrl = canvas.toDataURL('image/png');
+                snapshots.push({
+                    id: config.canvasId,
+                    title: config.title,
+                    description: config.description,
+                    dataUrl
+                });
+            } catch (error) {
+                console.warn(`Unable to capture plot "${config.canvasId}":`, error);
+            }
+        }
+    });
+
+    selectMode(originalMode);
+    generateModeContent(originalMode);
+
+    plotsContainer.style.visibility = originalVisibility;
+    window.scrollTo(0, originalScroll);
+
+    return snapshots;
 }
 
 // Prepare presentation data
@@ -1803,9 +1887,27 @@ async function preparePresentationData(labName, researcherName, experimentDate) 
 }
 
 // Generate PowerPoint HTML content
-function generatePowerPointContent(data) {
+function generatePowerPointContent(data, plotImages = []) {
     const timestamp = new Date().toLocaleString();
     
+    const plotSlides = plotImages.map(image => `
+    <div class="slide">
+        <h2>${image.title}</h2>
+        ${
+            image.dataUrl
+                ? `<div class="plot-image">
+                        <img src="${image.dataUrl}" alt="${image.title}">
+                        <p class="plot-caption">${image.description}</p>
+                   </div>`
+                : `<div class="plot-placeholder">
+                        <span class="placeholder-icon">📊</span>
+                        <p>Plot image unavailable.</p>
+                        <p class="plot-caption">${image.description}</p>
+                   </div>`
+        }
+    </div>
+    `).join('');
+
     return `
 <!DOCTYPE html>
 <html lang="en">
@@ -1832,11 +1934,15 @@ function generatePowerPointContent(data) {
         .stat-card { background: #ecf0f1; padding: 20px; border-radius: 8px; text-align: center; }
         .stat-card h4 { margin: 0 0 10px 0; color: #2c3e50; }
         .stat-card p { margin: 0; font-size: 1.2em; font-weight: bold; color: #3498db; }
+        .plot-image { margin: 30px auto; text-align: center; }
+        .plot-image img { max-width: 100%; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); border: 1px solid #d0d7de; }
+        .plot-caption { margin-top: 12px; color: #5f738c; font-size: 0.95em; }
+        .plot-placeholder { margin: 30px auto; padding: 32px; border: 2px dashed #d0d7de; border-radius: 12px; text-align: center; color: #5f738c; background: #f8fafc; }
+        .plot-placeholder .placeholder-icon { font-size: 2.4rem; margin-bottom: 12px; display: block; }
         @media print { .slide { page-break-after: always; } }
     </style>
 </head>
 <body>
-    <!-- Title Slide -->
     <div class="slide">
         <h1>Formalin Test Analysis</h1>
         <h2>Pain Behavior Research Study</h2>
@@ -1852,7 +1958,6 @@ function generatePowerPointContent(data) {
         </div>
     </div>
 
-    <!-- Study Overview -->
     <div class="slide">
         <h2>Study Overview</h2>
         <h3>Experimental Design</h3>
@@ -1874,7 +1979,6 @@ function generatePowerPointContent(data) {
         </div>
     </div>
 
-    <!-- Methodology -->
     <div class="slide">
         <h2>Methodology</h2>
         <h3>Formalin Test Protocol</h3>
@@ -1893,7 +1997,6 @@ function generatePowerPointContent(data) {
         </ul>
     </div>
 
-    <!-- Results Summary -->
     <div class="slide">
         <h2>Results Summary</h2>
         <h3>Control Group Performance</h3>
@@ -1935,7 +2038,6 @@ function generatePowerPointContent(data) {
         </table>
     </div>
 
-    <!-- Phase Analysis -->
     <div class="slide">
         <h2>Phase Analysis Results</h2>
         <h3>Phase-Specific Performance</h3>
@@ -1967,7 +2069,6 @@ function generatePowerPointContent(data) {
         </div>
     </div>
 
-    <!-- MPE Analysis -->
     <div class="slide">
         <h2>Maximum Possible Effect (MPE) Analysis</h2>
         <h3>Treatment Efficacy Assessment</h3>
@@ -1995,7 +2096,6 @@ function generatePowerPointContent(data) {
         </table>
     </div>
 
-    <!-- Conclusions -->
     <div class="slide">
         <h2>Conclusions and Recommendations</h2>
         <h3>Key Findings</h3>
@@ -2027,6 +2127,8 @@ function generatePowerPointContent(data) {
             <p>Generated on ${timestamp} by ${data.researcherName} at ${data.labName}</p>
         </div>
     </div>
+
+    ${plotSlides}
 </body>
 </html>
     `;
@@ -3065,33 +3167,6 @@ function drawTimeSeriesPlot(allGroups) {
         });
         ctx.stroke();
         
-        // Draw error bars
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1;
-        data.forEach(point => {
-            const x = scaleX(point.minute);
-            const yTop = scaleY(point.averageJumps + point.stdDev);
-            const yBottom = scaleY(point.averageJumps - point.stdDev);
-            
-            // Vertical error bar
-            ctx.beginPath();
-            ctx.moveTo(x, yTop);
-            ctx.lineTo(x, yBottom);
-            ctx.stroke();
-            
-            // Top cap
-            ctx.beginPath();
-            ctx.moveTo(x - 2, yTop);
-            ctx.lineTo(x + 2, yTop);
-            ctx.stroke();
-            
-            // Bottom cap
-            ctx.beginPath();
-            ctx.moveTo(x - 2, yBottom);
-            ctx.lineTo(x + 2, yBottom);
-            ctx.stroke();
-        });
-        
         // Draw data points
         ctx.fillStyle = color;
         data.forEach(point => {
@@ -3389,6 +3464,7 @@ function setupGroupSelection() {
         checkboxItem.className = 'group-selection-item';
         checkboxItem.innerHTML = `
             <input type="checkbox" id="select-${groupName}" 
+                   data-group-name="${groupName}"
                    ${selectedGroupsForPlot.has(groupName) ? 'checked' : ''} 
                    onchange="toggleGroupSelection('${groupName}')">
             <label for="select-${groupName}">${displayName}</label>
