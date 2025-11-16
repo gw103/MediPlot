@@ -2688,6 +2688,58 @@ function calculateTickStep(minValue, maxValue) {
     return bestOption.step;
 }
 
+// Get consistent color mapping for all groups across all plots
+function getGroupColorMap(allGroupNames) {
+    // Fixed colors for control groups
+    const controlColors = {
+        'Vehicle': '#4CAF50',
+        'Sham': '#2196F3'
+    };
+    
+    // Experimental group color palette (consistent across all plots)
+    const experimentalPalette = [
+        '#e74c3c',  // Red
+        '#9b59b6',  // Purple
+        '#f39c12',  // Orange
+        '#16a085',  // Teal
+        '#e67e22',  // Dark Orange
+        '#34495e',  // Dark Gray
+        '#1abc9c',  // Turquoise
+        '#d35400',  // Dark Red
+        '#667eea',  // Blue-Purple
+        '#f093fb',  // Pink
+        '#f5576c',  // Coral
+        '#4facfe',  // Light Blue
+        '#00f2fe',  // Cyan
+        '#43e97b',  // Green
+        '#fa709a',  // Rose
+        '#ffecd2'   // Peach
+    ];
+    
+    // Sort group names consistently (Vehicle and Sham first, then alphabetical)
+    const sortedGroups = [...allGroupNames].sort((a, b) => {
+        if (a === 'Vehicle') return -1;
+        if (b === 'Vehicle') return 1;
+        if (a === 'Sham') return -1;
+        if (b === 'Sham') return 1;
+        return a.localeCompare(b);
+    });
+    
+    const colorMap = {};
+    let experimentalIndex = 0;
+    
+    sortedGroups.forEach(groupName => {
+        if (controlColors[groupName]) {
+            colorMap[groupName] = controlColors[groupName];
+        } else {
+            colorMap[groupName] = experimentalPalette[experimentalIndex % experimentalPalette.length];
+            experimentalIndex += 1;
+        }
+    });
+    
+    return colorMap;
+}
+
 // Generate MPE Plot
 function generateMPEPlot() {
     const mpeData = calculateMPEValues();
@@ -2740,32 +2792,10 @@ function drawMPEPlot(mpeData) {
     const mpePercentValues = groups.map(group => mpeData.groupMPEs[group].groupMPE * 100);
     const stdDevPercentValues = groups.map(group => mpeData.groupMPEs[group].stdDev * 100);
 
-    // Assign colors (controls fixed, drug groups varied)
-    const controlColors = {
-        'Vehicle': '#4CAF50',
-        'Sham': '#2196F3'
-    };
-    const experimentalPalette = [
-        '#e74c3c',
-        '#9b59b6',
-        '#f39c12',
-        '#16a085',
-        '#e67e22',
-        '#34495e',
-        '#1abc9c',
-        '#d35400'
-    ];
-    let experimentalIndex = 0;
-    const groupColors = {};
-
-    groups.forEach(group => {
-        if (controlColors[group]) {
-            groupColors[group] = controlColors[group];
-        } else {
-            groupColors[group] = experimentalPalette[experimentalIndex % experimentalPalette.length];
-            experimentalIndex += 1;
-        }
-    });
+    // Get consistent color mapping for all groups
+    const allGroups = { ...groupData, 'Vehicle': vehicleGroup, 'Sham': shamGroup };
+    const allGroupNames = Object.keys(allGroups);
+    const groupColors = getGroupColorMap(allGroupNames);
     
     // Calculate bar width and spacing
     const barWidth = plotWidth / (groups.length + 1);
@@ -3267,19 +3297,13 @@ function drawTimeSeriesPlot(allGroups) {
         ctx.stroke();
     }
     
-    // Draw time series lines for each group
-    const colors = {
-        'Vehicle': '#4CAF50',
-        'Sham': '#2196F3',
-        'Group1': '#667eea',
-        'Group2': '#9c27b0',
-        'Group3': '#ff9800',
-        'Group4': '#f44336'
-    };
+    // Get consistent color mapping for all groups
+    const allGroupNames = Object.keys(allGroups);
+    const groupColors = getGroupColorMap(allGroupNames);
     
     Object.keys(timeSeriesData).forEach(groupName => {
         const data = timeSeriesData[groupName];
-        const color = colors[groupName] || '#666';
+        const color = groupColors[groupName] || '#666';
         
         // Draw main line
         ctx.strokeStyle = color;
@@ -3439,7 +3463,7 @@ function drawTimeSeriesPlot(allGroups) {
     let legendIndex = 0;
     
     Object.keys(timeSeriesData).forEach(groupName => {
-        const color = colors[groupName] || '#666';
+        const color = groupColors[groupName] || '#666';
         
         // Draw legend line
         ctx.strokeStyle = color;
@@ -3796,7 +3820,11 @@ function drawDistributionPlot(allGroups) {
     // Calculate positions
     const groupSpacing = plotWidth / (groupNames.length + 1);
     const dotRadius = 4;
-    const colors = ['#667eea', '#f093fb', '#f5576c', '#4facfe', '#00f2fe', '#43e97b', '#fa709a', '#ffecd2'];
+    
+    // Get consistent color mapping for all groups (use all groups, not just filtered)
+    const allGroupsForColor = { ...groupData, 'Vehicle': vehicleGroup, 'Sham': shamGroup };
+    const allGroupNamesForColor = Object.keys(allGroupsForColor);
+    const groupColors = getGroupColorMap(allGroupNamesForColor);
     
     // Draw grid lines
     ctx.strokeStyle = '#e0e0e0';
@@ -3819,7 +3847,7 @@ function drawDistributionPlot(allGroups) {
     groupNames.forEach((groupName, groupIndex) => {
         const groupCenterX = margin.left + groupSpacing * (groupIndex + 1);
         const data = groupData[groupName];
-        const color = colors[groupIndex % colors.length];
+        const color = groupColors[groupName] || '#666';
         
         // Draw individual dots with jitter
         data.values.forEach((value, mouseIndex) => {
@@ -3926,7 +3954,7 @@ function drawDistributionPlot(allGroups) {
     const legendY = margin.top + 20;
     
     groupNames.forEach((groupName, groupIndex) => {
-        const color = colors[groupIndex % colors.length];
+        const color = groupColors[groupName] || '#666';
         const displayName = getDisplayName(groupName);
         const y = legendY + groupIndex * 25;
         
