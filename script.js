@@ -1764,7 +1764,7 @@ async function generatePPT() {
     try {
         // Prepare presentation data
         const presentationData = await preparePresentationData(labName, researcherName, experimentDate);
-        const plotImages = capturePlotSnapshots();
+        const plotImages = await capturePlotSnapshots();
         
         // Generate PowerPoint content
         const pptContent = generatePowerPointContent(presentationData, plotImages);
@@ -1785,7 +1785,7 @@ async function generatePPT() {
     }
 }
 
-function capturePlotSnapshots() {
+async function capturePlotSnapshots() {
     const plotsContainer = document.getElementById('plots-container');
     if (!plotsContainer) {
         return [];
@@ -1819,28 +1819,62 @@ function capturePlotSnapshots() {
 
     plotsContainer.style.visibility = 'hidden';
 
-    plotConfigs.forEach(config => {
+    for (const config of plotConfigs) {
         selectMode(config.mode);
         if (config.mode === 'time-series' || config.mode === 'distribution') {
             ensureAllGroupsSelected();
         }
         generateModeContent(config.mode);
 
+        // Wait for canvas to be drawn, especially for MPE plot which uses setTimeout
+        if (config.mode === 'mpe') {
+            // For MPE plot, wait for canvas to exist and be drawn
+            let canvas = document.getElementById(config.canvasId);
+            let attempts = 0;
+            while ((!canvas || !canvas.getContext) && attempts < 10) {
+                await new Promise(resolve => setTimeout(resolve, 50));
+                canvas = document.getElementById(config.canvasId);
+                attempts++;
+            }
+            // Wait for the MPE plot to be drawn (it uses setTimeout with 100ms delay)
+            await new Promise(resolve => setTimeout(resolve, 200));
+        } else {
+            // Small delay for other plots to ensure they're rendered
+            await new Promise(resolve => setTimeout(resolve, 50));
+        }
+
         const canvas = document.getElementById(config.canvasId);
         if (canvas && typeof canvas.toDataURL === 'function') {
             try {
-                const dataUrl = canvas.toDataURL('image/png');
-                snapshots.push({
-                    id: config.canvasId,
-                    title: config.title,
-                    description: config.description,
-                    dataUrl
-                });
+                // For MPE plot, ensure it's drawn by calling drawMPEPlot directly if needed
+                if (config.mode === 'mpe') {
+                    const mpeData = calculateMPEValues();
+                    drawMPEPlot(mpeData);
+                    // Wait a bit more to ensure drawing is complete
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                
+                // Check if canvas has content by checking if it's not blank
+                const ctx = canvas.getContext('2d');
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const hasContent = imageData.data.some((val, idx) => idx % 4 !== 3 && val !== 0);
+                
+                if (hasContent) {
+                    const dataUrl = canvas.toDataURL('image/png');
+                    snapshots.push({
+                        id: config.canvasId,
+                        title: config.title,
+                        description: config.description,
+                        dataUrl
+                    });
+                } else {
+                    console.warn(`Canvas "${config.canvasId}" appears to be blank`);
+                }
             } catch (error) {
                 console.warn(`Unable to capture plot "${config.canvasId}":`, error);
             }
         }
-    });
+    }
 
     selectMode(originalMode);
     generateModeContent(originalMode);
@@ -2591,6 +2625,69 @@ function calculateMPEValues() {
     };
 }
 
+// Calculate appropriate tick step (20, 200, 2000, 20000, etc.) based on range
+function calculateTickStep(minValue, maxValue) {
+    const range = maxValue - minValue;
+    if (range <= 0) return 20;
+    
+    // Calculate desired number of ticks (5-10 ticks)
+    const desiredTicks = 6;
+    let idealStep = range / desiredTicks;
+    
+    // Find the order of magnitude
+    const orderOfMagnitude = Math.floor(Math.log10(idealStep));
+    const base = Math.pow(10, orderOfMagnitude);
+    
+    // Try to use 2 * 10^n (20, 200, 2000, etc.) as preferred
+    const step20 = 2 * base;  // 20, 200, 2000, 20000, etc.
+    const step10 = 1 * base;  // 10, 100, 1000, etc.
+    const step50 = 5 * base;  // 50, 500, 5000, etc.
+    const step200 = 20 * base; // 200, 2000, 20000, etc.
+    
+    // Calculate number of ticks for each option
+    const ticks20 = Math.ceil(range / step20);
+    const ticks10 = Math.ceil(range / step10);
+    const ticks50 = Math.ceil(range / step50);
+    const ticks200 = Math.ceil(range / step200);
+    
+    // Prefer 2 * 10^n (20, 200, 2000, etc.) if it gives reasonable number of ticks (3-15)
+    if (ticks20 >= 3 && ticks20 <= 15) {
+        return step20;
+    }
+    
+    // If 2 * 10^n gives too many ticks, try 20 * 10^n
+    if (ticks20 > 15 && ticks200 >= 3 && ticks200 <= 15) {
+        return step200;
+    }
+    
+    // If 2 * 10^n gives too few ticks, try 1 * 10^n or 5 * 10^n
+    if (ticks20 < 3) {
+        if (ticks10 >= 3 && ticks10 <= 15) {
+            return step10;
+        }
+        if (ticks50 >= 3 && ticks50 <= 15) {
+            return step50;
+        }
+    }
+    
+    // Fallback: use the one that gives closest to desired number of ticks
+    const options = [
+        { step: step20, ticks: ticks20 },
+        { step: step10, ticks: ticks10 },
+        { step: step50, ticks: ticks50 },
+        { step: step200, ticks: ticks200 }
+    ];
+    
+    // Find option with ticks closest to desiredTicks
+    const bestOption = options.reduce((best, current) => {
+        const bestDiff = Math.abs(best.ticks - desiredTicks);
+        const currentDiff = Math.abs(current.ticks - desiredTicks);
+        return currentDiff < bestDiff ? current : best;
+    });
+    
+    return bestOption.step;
+}
+
 // Generate MPE Plot
 function generateMPEPlot() {
     const mpeData = calculateMPEValues();
@@ -2641,6 +2738,7 @@ function drawMPEPlot(mpeData) {
     // Get group names and MPE values
     const groups = Object.keys(mpeData.groupMPEs);
     const mpePercentValues = groups.map(group => mpeData.groupMPEs[group].groupMPE * 100);
+    const stdDevPercentValues = groups.map(group => mpeData.groupMPEs[group].stdDev * 100);
 
     // Assign colors (controls fixed, drug groups varied)
     const controlColors = {
@@ -2675,8 +2773,10 @@ function drawMPEPlot(mpeData) {
     const actualBarWidth = barWidth - barSpacing;
     
     // Find min and max values for scaling (including error bars)
-    const minMPE = Math.min(0, Math.min(...mpePercentValues));
-    const maxMPE = Math.max(100, Math.max(...mpePercentValues));
+    const maxWithError = Math.max(...mpePercentValues.map((val, idx) => val + stdDevPercentValues[idx]));
+    const minWithError = Math.min(...mpePercentValues.map((val, idx) => val - stdDevPercentValues[idx]));
+    const minMPE = Math.min(0, minWithError);
+    const maxMPE = Math.max(100, maxWithError);
     const range = maxMPE - minMPE;
     const padding = Math.max(5, range * 0.05);
     
@@ -2696,14 +2796,39 @@ function drawMPEPlot(mpeData) {
         ctx.fillStyle = color;
         ctx.fillRect(x, y, actualBarWidth, barHeight);
         
-        // Add group name
-        ctx.fillStyle = '#666';
-        ctx.font = '12px Inter';
-        ctx.fillText(getDisplayName(group), x + actualBarWidth / 2, height - margin.bottom + 20);
+        // Draw error bars (standard deviation)
+        const stdDev = stdDevPercentValues[index];
+        const topY = scaleY(mpePercentValues[index] + stdDev);
+        const bottomY = scaleY(mpePercentValues[index] - stdDev);
+        const centerX = x + actualBarWidth / 2;
+        const errorBarWidth = actualBarWidth * 0.3;
+        const capWidth = 6;
         
-        // Add MPE value on top of bar
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 2;
+        
+        // Vertical line
+        ctx.beginPath();
+        ctx.moveTo(centerX, topY);
+        ctx.lineTo(centerX, bottomY);
+        ctx.stroke();
+        
+        // Top cap
+        ctx.beginPath();
+        ctx.moveTo(centerX - capWidth / 2, topY);
+        ctx.lineTo(centerX + capWidth / 2, topY);
+        ctx.stroke();
+        
+        // Bottom cap
+        ctx.beginPath();
+        ctx.moveTo(centerX - capWidth / 2, bottomY);
+        ctx.lineTo(centerX + capWidth / 2, bottomY);
+        ctx.stroke();
+        
+        // Add MPE value on top of error bar
         ctx.fillStyle = '#333';
-        ctx.fillText(`${mpePercentValues[index].toFixed(1)}%`, x + actualBarWidth / 2, y - 5);
+        ctx.textAlign = 'center';
+        ctx.fillText(`${mpePercentValues[index].toFixed(1)}%`, x + actualBarWidth / 2, topY - 5);
     });
     
     // Draw axes
@@ -2738,10 +2863,12 @@ function drawMPEPlot(mpeData) {
     ctx.textAlign = 'center';
     ctx.fillText('Groups', width / 2, height - 10);
     
-    // Add Y-axis ticks and labels
-    const numTicks = 5;
-    for (let i = 0; i <= numTicks; i++) {
-        const value = minMPE - padding + (i / numTicks) * (range + 2 * padding);
+    // Add Y-axis ticks and labels (multiples of 20, 200, 2000, etc. based on range)
+    const tickStep = calculateTickStep(minMPE - padding, maxMPE + padding);
+    const minTick = Math.floor((minMPE - padding) / tickStep) * tickStep;
+    const maxTick = Math.ceil((maxMPE + padding) / tickStep) * tickStep;
+    
+    for (let value = minTick; value <= maxTick; value += tickStep) {
         const y = scaleY(value);
         
         // Draw tick
@@ -2756,7 +2883,9 @@ function drawMPEPlot(mpeData) {
         ctx.fillStyle = '#666';
         ctx.font = '12px Inter';
         ctx.textAlign = 'right';
-        ctx.fillText(`${value.toFixed(0)}%`, margin.left - 10, y + 4);
+        // Format based on magnitude
+        const label = value >= 1000 ? value.toFixed(0) : value.toFixed(value % 1 === 0 ? 0 : 1);
+        ctx.fillText(`${label}%`, margin.left - 10, y + 4);
     }
     
     // Add legend
@@ -3125,10 +3254,12 @@ function drawTimeSeriesPlot(allGroups) {
         ctx.stroke();
     }
     
-    // Horizontal grid lines
-    const numHorizontalLines = 5;
-    for (let i = 0; i <= numHorizontalLines; i++) {
-        const value = minValue - padding + (i / numHorizontalLines) * (range + 2 * padding);
+    // Horizontal grid lines (multiples of 20, 200, 2000, etc. based on range)
+    const gridTickStep = calculateTickStep(minValue - padding, maxValue + padding);
+    const gridMinTick = Math.floor((minValue - padding) / gridTickStep) * gridTickStep;
+    const gridMaxTick = Math.ceil((maxValue + padding) / gridTickStep) * gridTickStep;
+    
+    for (let value = gridMinTick; value <= gridMaxTick; value += gridTickStep) {
         const y = scaleY(value);
         ctx.beginPath();
         ctx.moveTo(margin.left, y);
@@ -3274,12 +3405,17 @@ function drawTimeSeriesPlot(allGroups) {
         ctx.fillText(`${i}`, x, height - margin.bottom + 20);
     }
     
-    // Y-axis labels
+    // Y-axis labels (multiples of 20, 200, 2000, etc. based on range)
     ctx.textAlign = 'right';
-    for (let i = 0; i <= numHorizontalLines; i++) {
-        const value = minValue - padding + (i / numHorizontalLines) * (range + 2 * padding);
+    const tickStep = calculateTickStep(minValue - padding, maxValue + padding);
+    const minTick = Math.floor((minValue - padding) / tickStep) * tickStep;
+    const maxTick = Math.ceil((maxValue + padding) / tickStep) * tickStep;
+    
+    for (let value = minTick; value <= maxTick; value += tickStep) {
         const y = scaleY(value);
-        ctx.fillText(value.toFixed(1), margin.left - 10, y + 4);
+        // Format based on magnitude
+        const label = value >= 1000 ? value.toFixed(0) : value.toFixed(value % 1 === 0 ? 0 : 1);
+        ctx.fillText(label, margin.left - 10, y + 4);
     }
     
     // Axis labels
@@ -3666,9 +3802,13 @@ function drawDistributionPlot(allGroups) {
     ctx.strokeStyle = '#e0e0e0';
     ctx.lineWidth = 1;
     
-    // Horizontal grid lines
-    for (let i = 0; i <= 5; i++) {
-        const y = margin.top + (plotHeight * i / 5);
+    // Horizontal grid lines (multiples of 20, 200, 2000, etc. based on range)
+    const distTickStep = calculateTickStep(yMin, yMax);
+    const distMinTick = Math.floor(yMin / distTickStep) * distTickStep;
+    const distMaxTick = Math.ceil(yMax / distTickStep) * distTickStep;
+    
+    for (let value = distMinTick; value <= distMaxTick; value += distTickStep) {
+        const y = margin.top + plotHeight - ((value - yMin) / (yMax - yMin)) * plotHeight;
         ctx.beginPath();
         ctx.moveTo(margin.left, y);
         ctx.lineTo(margin.left + plotWidth, y);
@@ -3737,16 +3877,21 @@ function drawDistributionPlot(allGroups) {
     ctx.lineTo(margin.left + plotWidth, margin.top + plotHeight);
     ctx.stroke();
     
-    // Draw Y-axis labels
+    // Draw Y-axis labels (multiples of 20, 200, 2000, etc. based on range)
     ctx.fillStyle = '#333';
     ctx.font = '12px Inter';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
     
-    for (let i = 0; i <= 5; i++) {
-        const value = yMin + (yMax - yMin) * (5 - i) / 5;
-        const y = margin.top + (plotHeight * i / 5);
-        ctx.fillText(Math.round(value).toString(), margin.left - 10, y);
+    const tickStep = calculateTickStep(yMin, yMax);
+    const minTick = Math.floor(yMin / tickStep) * tickStep;
+    const maxTick = Math.ceil(yMax / tickStep) * tickStep;
+    
+    for (let value = minTick; value <= maxTick; value += tickStep) {
+        const y = margin.top + plotHeight - ((value - yMin) / (yMax - yMin)) * plotHeight;
+        // Format based on magnitude
+        const label = value >= 1000 ? value.toFixed(0) : value.toString();
+        ctx.fillText(label, margin.left - 10, y);
     }
     
     // Draw X-axis labels (group names)
